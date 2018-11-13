@@ -1,36 +1,78 @@
-/*
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
-import (
-	"context"
-	"flag"
-	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"regexp"
-	"strings"
-
-	"golang.org/x/oauth2"
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/youtube/v3"
-)
+import "google.golang.org/api/youtube/v3"
+import "google.golang.org/api/googleapi"
+import "golang.org/x/oauth2"
+import "net/http"
+import "strings"
+import "context"
+import "regexp"
+import "flag"
+import "fmt"
+import "log"
+import "io"
+import "os"
 
 type chanChan chan chan struct{}
+
+func main2() {
+	var video = flag.String("video", "", "set input video file")
+	flag.StringVar(video, "v", "", "set input video file")
+	var thumbnail = flag.String("thumbnail", "", "set input thumbnail file")
+	flag.StringVar(thumbnail, "t", "", "set input thumbnail file")
+	var caption = flag.String("caption", "", "set input caption file")
+	flag.StringVar(caption, "c", "", "set input caption file")
+	var meta = flag.String("meta", "", "set input meta file")
+	flag.StringVar(meta, "m", "", "set input meta file")
+	var log = flag.Bool("log", false, "enable log")
+	flag.BoolVar(log, "l", false, "enable log")
+	var clientID = flag.String("client_id", "client_id.json", "set client id credentials path")
+	flag.StringVar(clientID, "ci", "client_id.json", "set client id credentials path")
+	var clientToken = flag.String("client_token", "client_token.json", "set client token credentials path")
+	flag.StringVar(clientToken, "ct", "client_token.json", "set client token credentials path")
+	var videoTitle = flag.String("video_title", "", "set video title")
+	flag.StringVar(videoTitle, "vt", "", "set video title")
+	var videoDescription = flag.String("video_description", "", "set video description")
+	flag.StringVar(videoDescription, "vd", "", "set video description")
+	var videoTags = flag.String("video_tags", "", "set video tags/keywords")
+	flag.StringVar(videoTags, "vk", "", "set video tags/keywords")
+	var videoLanguage = flag.String("video_language", "en", "set video language")
+	flag.StringVar(videoLanguage, "vl", "en", "set video language")
+	var videoCategory = flag.String("video_category", "22", "set video category id")
+	flag.StringVar(videoCategory, "vc", "22", "set video category id")
+	var videoPrivacyStatus = flag.String("video_privacystatus", "public", "set video privacy status")
+	flag.StringVar(videoPrivacyStatus, "vp", "public", "set video privacy status")
+	var videoEmbeddable = flag.Bool("video_embeddable", true, "enable video to be embeddable")
+	flag.BoolVar(videoEmbeddable, "ve", true, "enable video to be embeddable")
+	var videoLicense = flag.String("video_license", "standard", "set video license")
+	flag.StringVar(videoLicense, "vl", "standard", "set video license")
+	var videoPublicStatsViewable = flag.Bool("video_publicstatsviewable", true, "enable public video stats to be viewable")
+	flag.BoolVar(videoPublicStatsViewable, "vs", true, "enable public video stats to be viewable")
+	var videoPublishAt = flag.String("video_publishat", "", "set video publish time")
+	flag.StringVar(videoPublishAt, "vpa", "", "set video publish time")
+	var videoRecordingDate = flag.String("video_recordingdate", "", "set video recording date")
+	flag.StringVar(videoRecordingDate, "vrd", "", "set video recording date")
+	var videoPlaylistIds = flag.String("video_playlistids", "", "set video playlist ids")
+	flag.StringVar(videoPlaylistIds, "vpi", "", "set video playlist ids")
+	var videoPlaylistTitles = flag.String("video_playlisttitles", "", "set video playlist titles")
+	flag.StringVar(videoPlaylistTitles, "vpt", "", "set video playlist titles")
+	var videoLocationLatitude = flag.Float64("video_location_latitude", 0, "set video latitude coordinate")
+	flag.Float64Var(videoLocationLatitude, "vla", 0, "set video latitude coordinate")
+	var videoLocationLongitude = flag.Float64("video_location_longitude", 0, "set video longitude coordinate")
+	flag.Float64Var(videoLocationLongitude, "vlo", 0, "set video longitude coordinate")
+	var videoLocationDescription = flag.String("video_locationdescription", "", "set video location description")
+	flag.StringVar(videoLocationDescription, "vld", "", "set video location description")
+	var uploadChunk = flag.Int("upload_chunk", 8388608, "set upload chunk size in bytes")
+	flag.IntVar(uploadChunk, "uc", 8388608, "set upload chunk size in bytes")
+	var uploadRate = flag.Float64("upload_rate", 0, "set upload rate limit in kbps")
+	flag.Float64Var(uploadRate, "ur", 0, "set upload rate limit in kbps")
+	var uploadTime = flag.String("upload_time", "", "set upload time limit ex- \"10:00-14:00\"")
+	flag.StringVar(uploadTime, "ut", "", "set upload time limit ex- \"10:00-14:00\"")
+	var authPort = flag.Int("auth_port", 8080, "set OAuth request port")
+	flag.IntVar(authPort, "ap", 8080, "set OAuth request port")
+	var authHeadless = flag.Bool("auth_headless", false, "enable browserless OAuth process")
+	flag.BoolVar(authHeadless, "ah", false, "enable browserless OAuth process")
+}
 
 var (
 	filename       = flag.String("filename", "", "Filename to upload. Can be a URL")
