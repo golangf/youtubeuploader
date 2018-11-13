@@ -1,18 +1,21 @@
 package main
 
-import "google.golang.org/api/youtube/v3"
-import "google.golang.org/api/googleapi"
-import "golang.org/x/oauth2"
-import "net/http"
-import "strings"
-import "strconv"
-import "context"
-import "regexp"
-import "flag"
-import "fmt"
-import "log"
-import "io"
-import "os"
+import (
+	"context"
+	"flag"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"golang.org/x/oauth2"
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/youtube/v3"
+)
 
 type chanChan chan chan struct{}
 
@@ -208,6 +211,46 @@ func onHelp(f *Flags) {
 	}
 }
 
+func onTitle(srv *youtube.Service, txt string) {
+	res, err := srv.Search.List("snippet").Type("video").Q(txt).Do()
+	if err != nil {
+		if res != nil {
+			log.Fatalf("Error searching video title  '%v': %v, %v", txt, err, res.HTTPStatusCode)
+		} else {
+			log.Fatalf("Error searching video title '%v': %v", txt, err)
+		}
+	}
+	var re = regexp.MustCompile("\\W")
+	var texta = strings.ToLower(re.ReplaceAllString(txt, ""))
+	for _, item := range res.Items {
+		var textb = strings.ToLower(re.ReplaceAllString(item.Snippet.Title, ""))
+		if texta == textb {
+			fmt.Printf("%v\n", item.Id.VideoId)
+		}
+	}
+}
+
+func uploadVideo(srv *youtube.Service, nam string, fil io.ReadCloser, obj *youtube.Video, cnk int, cquit chanChan) *youtube.Video {
+	fmt.Printf("Uploading file '%s'...\n", nam)
+	opt := googleapi.ChunkSize(cnk)
+	req := srv.Videos.Insert("snippet,status,recordingDetails", obj)
+	res, err := req.Media(fil, opt).Do()
+	if cquit != nil {
+		quit := make(chan struct{})
+		cquit <- quit
+		<-quit
+	}
+	if err != nil {
+		if res != nil {
+			log.Fatalf("Error making YouTube API call: %v, %v", err, res.HTTPStatusCode)
+		} else {
+			log.Fatalf("Error making YouTube API call: %v", err)
+		}
+	}
+	fmt.Printf("Upload successful! Video ID: %v\n", res.Id)
+	return res
+}
+
 func uploadThumbnail(srv *youtube.Service, id string, nam string, fil io.ReadCloser) {
 	if fil != nil {
 		log.Printf("Uploading thumbnail '%s'...\n", nam)
@@ -294,26 +337,6 @@ func addToPlaylistTitles(srv *youtube.Service, pnams []string, sta string, id st
 	}
 }
 
-// Search video by title (exact text)
-func searchTitle(service *youtube.Service, text *string) {
-	call, err := service.Search.List("snippet").Type("video").Q(*text).Do()
-	if err != nil {
-		if call != nil {
-			log.Fatalf("Error searching video title  '%v': %v, %v", text, err, call.HTTPStatusCode)
-		} else {
-			log.Fatalf("Error searching video title '%v': %v", text, err)
-		}
-	}
-	var re = regexp.MustCompile("\\W")
-	var texta = strings.ToLower(re.ReplaceAllString(*text, ""))
-	for _, item := range call.Items {
-		var textb = strings.ToLower(re.ReplaceAllString(item.Snippet.Title, ""))
-		if texta == textb {
-			fmt.Printf("%v\n", item.Id.VideoId)
-		}
-	}
-}
-
 // Main.
 func main() {
 	// var videoFile io.ReadCloser
@@ -362,7 +385,7 @@ func main() {
 
 	// search video by title
 	if f.Video == "" && f.Title != "" {
-		searchTitle(service, &f.Title)
+		onTitle(service, f.Title)
 		os.Exit(0)
 	}
 	if f.Title == "" {
@@ -390,31 +413,7 @@ func main() {
 	if upload.Snippet.DefaultAudioLanguage == "" && f.Language != "" {
 		upload.Snippet.DefaultAudioLanguage = f.Language
 	}
-
-	fmt.Printf("Uploading file '%s'...\n", f.Video)
-
-	var option googleapi.MediaOption
-	var video *youtube.Video
-
-	option = googleapi.ChunkSize(f.UploadChunk)
-
-	call := service.Videos.Insert("snippet,status,recordingDetails", upload)
-	video, err = call.Media(videoFile, option).Do()
-
-	if quitChan != nil {
-		quit := make(chan struct{})
-		quitChan <- quit
-		<-quit
-	}
-
-	if err != nil {
-		if video != nil {
-			log.Fatalf("Error making YouTube API call: %v, %v", err, video.HTTPStatusCode)
-		} else {
-			log.Fatalf("Error making YouTube API call: %v", err)
-		}
-	}
-	fmt.Printf("Upload successful! Video ID: %v\n", video.Id)
+	video := uploadVideo(service, f.Video, videoFile, upload, f.UploadChunk, quitChan)
 	uploadThumbnail(service, video.Id, f.Thumbnail, thumbnailFile)
 	uploadCaption(service, video.Id, f.Caption, captionFile)
 	addToPlaylistID(service, videoMeta.PlaylistID, upload.Status.PrivacyStatus, video.Id)
