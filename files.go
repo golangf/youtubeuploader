@@ -85,19 +85,19 @@ func LoadVideoMeta(filename string, video *youtube.Video) (videoMeta VideoMeta) 
 errJump:
 
 	if video.Status.PrivacyStatus == "" {
-		video.Status.PrivacyStatus = *privacy
+		video.Status.PrivacyStatus = f.PrivacyStatus
 	}
-	if video.Snippet.Tags == nil && strings.Trim(*tags, "") != "" {
-		video.Snippet.Tags = strings.Split(*tags, ",")
+	if video.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
+		video.Snippet.Tags = strings.Split(f.Tags, ",")
 	}
 	if video.Snippet.Title == "" {
-		video.Snippet.Title = *title
+		video.Snippet.Title = f.Title
 	}
 	if video.Snippet.Description == "" {
-		video.Snippet.Description = *description
+		video.Snippet.Description = f.Description
 	}
-	if video.Snippet.CategoryId == "" && *categoryId != "" {
-		video.Snippet.CategoryId = *categoryId
+	if video.Snippet.CategoryId == "" && f.Category != "" {
+		video.Snippet.CategoryId = f.Category
 	}
 
 	return

@@ -49,6 +49,10 @@ type Flags struct {
 	Version             bool
 }
 
+// Set by compile-time to match git tag
+var appVersion = ""
+var f = Flags{}
+
 func parseBool(txt string, def bool) bool {
 	ans, err := strconv.ParseBool(txt)
 	if err != nil {
@@ -71,6 +75,21 @@ func parseFloat(txt string, def float64) float64 {
 		return def
 	}
 	return ans
+}
+
+func openFile(nam string) (io.ReadCloser, int64) {
+	var fil io.ReadCloser
+	var siz int64
+	var err error
+	// open video file
+	if nam != "" {
+		fil, siz, err = Open(nam)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer fil.Close()
+	}
+	return fil, siz
 }
 
 func getEnv(f *Flags) {
@@ -161,28 +180,33 @@ func getFlags(f *Flags) {
 	flag.Parse()
 }
 
-var (
-	filename       = flag.String("filename", "", "Filename to upload. Can be a URL")
-	thumbnail      = flag.String("thumbnail", "", "Thumbnail to upload. Can be a URL")
-	caption        = flag.String("caption", "", "Caption to upload. Can be URL")
-	title          = flag.String("title", "", "Video title")
-	description    = flag.String("description", "uploaded by youtubeuploader", "Video description")
-	language       = flag.String("language", "en", "Video language")
-	categoryId     = flag.String("categoryId", "", "Video category Id")
-	tags           = flag.String("tags", "", "Comma separated list of video tags")
-	privacy        = flag.String("privacy", "private", "Video privacy status")
-	quiet          = flag.Bool("quiet", false, "Suppress progress indicator")
-	rate           = flag.Int("ratelimit", 0, "Rate limit upload in kbps. No limit by default")
-	metaJSON       = flag.String("metaJSON", "", "JSON file containing title,description,tags etc (optional)")
-	limitBetween   = flag.String("limitBetween", "", "Only rate limit between these times e.g. 10:00-14:00 (local time zone)")
-	headlessAuth   = flag.Bool("headlessAuth", false, "set this if no browser available for the oauth authorisation step")
-	oAuthPort      = flag.Int("oAuthPort", 8080, "TCP port to listen on when requesting an oAuth token")
-	showAppVersion = flag.Bool("v", false, "show version")
-	chunksize      = flag.Int("chunksize", googleapi.DefaultUploadChunkSize, "size (in bytes) of each upload chunk. A zero value will cause all data to be uploaded in a single request")
+func getUploadTime(f *Flags) limitRange {
+	var ans limitRange
+	var err error
+	if f.UploadTime != "" {
+		ans, err = parseLimitBetween(f.UploadTime)
+		if err != nil {
+			fmt.Printf("Invalid upload time: %v", err)
+			os.Exit(1)
+		}
+	}
+	return ans
+}
 
-	// this is set by compile-time to match git tag
-	appVersion string = "unknown"
-)
+func onVersion(f *Flags) {
+	if f.Version {
+		fmt.Printf("youtubeuploader v%s\n", appVersion)
+		os.Exit(0)
+	}
+}
+
+func onHelp(f *Flags) {
+	if f.Video == "" && f.Title == "" {
+		fmt.Printf("No video file to upload!\n")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+}
 
 // Search video by title (exact text)
 func searchTitle(service *youtube.Service, text *string) {
@@ -206,71 +230,30 @@ func searchTitle(service *youtube.Service, text *string) {
 
 // Main.
 func main() {
-	f := Flags{}
-	getEnv(&f)
-	getFlags(&f)
-	// show version?
-	if f.Version {
-		fmt.Printf("@youtubeuploader: %s\n", appVersion)
-		os.Exit(0)
-	}
-	// video file?
-	if f.Video == "" && f.Title == "" {
-		fmt.Printf("@youtubeuploader: No video file to upload!\n")
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
-
-	var reader io.ReadCloser
-	var filesize int64
+	// var videoFile io.ReadCloser
+	// var fileSize int64
 	var err error
 
-	var limitRange limitRange
-	if *limitBetween != "" {
-		limitRange, err = parseLimitBetween(*limitBetween)
-		if err != nil {
-			fmt.Printf("Invalid value for -limitBetween: %v", err)
-			os.Exit(1)
-		}
-	}
-
-	if *filename != "" {
-		reader, filesize, err = Open(*filename)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer reader.Close()
-	}
-
-	var thumbReader io.ReadCloser
-	if *thumbnail != "" {
-		thumbReader, _, err = Open(*thumbnail)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer thumbReader.Close()
-	}
-
-	var captionReader io.ReadCloser
-	if *caption != "" {
-		captionReader, _, err = Open(*caption)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer captionReader.Close()
-	}
+	getEnv(&f)
+	getFlags(&f)
+	onVersion(&f)
+	onHelp(&f)
+	uploadTime := getUploadTime(&f)
+	videoFile, fileSize := openFile(f.Video)
+	thumbnailFile, _ := openFile(f.Thumbnail)
+	captionFile, _ := openFile(f.Caption)
 
 	ctx := context.Background()
-	transport := &limitTransport{rt: http.DefaultTransport, lr: limitRange, filesize: filesize}
+	transport := &limitTransport{rt: http.DefaultTransport, lr: uploadTime, filesize: fileSize}
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
 		Transport: transport,
 	})
 
 	var quitChan chanChan
-	if !*quiet {
+	if f.Log {
 		quitChan = make(chanChan)
 		go func() {
-			Progress(quitChan, transport, filesize)
+			Progress(quitChan, transport, fileSize)
 		}()
 	}
 	client, err := buildOAuthHTTPClient(ctx, []string{youtube.YoutubeUploadScope, youtube.YoutubepartnerScope, youtube.YoutubeScope})
@@ -284,53 +267,53 @@ func main() {
 		Status:           &youtube.VideoStatus{},
 	}
 
-	videoMeta := LoadVideoMeta(*metaJSON, upload)
+	videoMeta := LoadVideoMeta(f.Meta, upload)
 
 	service, err := youtube.New(client)
 	if err != nil {
-		log.Fatalf("Error creating Youtube client: %s", err)
+		log.Fatalf("Error creating YouTube client: %s", err)
 	}
 
-	// Search video by title
-	if *filename == "" && *title != "" {
-		searchTitle(service, title)
+	// search video by title
+	if f.Video == "" && f.Title != "" {
+		searchTitle(service, &f.Title)
 		os.Exit(0)
 	}
-	if *title == "" {
-		*title = "Video title"
+	if f.Title == "" {
+		f.Title = "Video title"
 	}
 
 	if upload.Status.PrivacyStatus == "" {
-		upload.Status.PrivacyStatus = *privacy
+		upload.Status.PrivacyStatus = f.PrivacyStatus
 	}
-	if upload.Snippet.Tags == nil && strings.Trim(*tags, "") != "" {
-		upload.Snippet.Tags = strings.Split(*tags, ",")
+	if upload.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
+		upload.Snippet.Tags = strings.Split(f.Tags, ",")
 	}
 	if upload.Snippet.Title == "" {
-		upload.Snippet.Title = *title
+		upload.Snippet.Title = f.Title
 	}
 	if upload.Snippet.Description == "" {
-		upload.Snippet.Description = *description
+		upload.Snippet.Description = f.Description
 	}
-	if upload.Snippet.CategoryId == "" && *categoryId != "" {
-		upload.Snippet.CategoryId = *categoryId
+	if upload.Snippet.CategoryId == "" && f.Category != "" {
+		upload.Snippet.CategoryId = f.Category
 	}
-	if upload.Snippet.DefaultLanguage == "" && *language != "" {
-		upload.Snippet.DefaultLanguage = *language
+	if upload.Snippet.DefaultLanguage == "" && f.Language != "" {
+		upload.Snippet.DefaultLanguage = f.Language
 	}
-	if upload.Snippet.DefaultAudioLanguage == "" && *language != "" {
-		upload.Snippet.DefaultAudioLanguage = *language
+	if upload.Snippet.DefaultAudioLanguage == "" && f.Language != "" {
+		upload.Snippet.DefaultAudioLanguage = f.Language
 	}
 
-	fmt.Printf("Uploading file '%s'...\n", *filename)
+	fmt.Printf("Uploading file '%s'...\n", f.Video)
 
 	var option googleapi.MediaOption
 	var video *youtube.Video
 
-	option = googleapi.ChunkSize(*chunksize)
+	option = googleapi.ChunkSize(f.UploadChunk)
 
 	call := service.Videos.Insert("snippet,status,recordingDetails", upload)
-	video, err = call.Media(reader, option).Do()
+	video, err = call.Media(videoFile, option).Do()
 
 	if quitChan != nil {
 		quit := make(chan struct{})
@@ -347,9 +330,9 @@ func main() {
 	}
 	fmt.Printf("Upload successful! Video ID: %v\n", video.Id)
 
-	if thumbReader != nil {
-		log.Printf("Uploading thumbnail '%s'...\n", *thumbnail)
-		_, err = service.Thumbnails.Set(video.Id).Media(thumbReader).Do()
+	if thumbnailFile != nil {
+		log.Printf("Uploading thumbnail '%s'...\n", f.Thumbnail)
+		_, err = service.Thumbnails.Set(video.Id).Media(thumbnailFile).Do()
 		if err != nil {
 			log.Fatalf("Error making YouTube API call: %v", err)
 		}
@@ -357,15 +340,15 @@ func main() {
 	}
 
 	// Insert caption
-	if captionReader != nil {
+	if captionFile != nil {
 		captionObj := &youtube.Caption{
 			Snippet: &youtube.CaptionSnippet{},
 		}
 		captionObj.Snippet.VideoId = video.Id
-		captionObj.Snippet.Language = *language
-		captionObj.Snippet.Name = *language
+		captionObj.Snippet.Language = f.Language
+		captionObj.Snippet.Name = f.Language
 		captionInsert := service.Captions.Insert("snippet", captionObj).Sync(true)
-		captionRes, err := captionInsert.Media(captionReader).Do()
+		captionRes, err := captionInsert.Media(captionFile).Do()
 		if err != nil {
 			if captionRes != nil {
 				log.Fatalf("Error inserting caption: %v, %v", err, captionRes.HTTPStatusCode)
