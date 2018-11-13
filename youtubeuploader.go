@@ -260,6 +260,40 @@ func addToPlaylistID(srv *youtube.Service, pid string, sta string, id string) {
 	}
 }
 
+func addToPlaylistIDs(srv *youtube.Service, pids []string, sta string, id string) {
+	p := Playlistx{}
+	if sta != "" {
+		p.PrivacyStatus = sta
+	}
+	if len(pids) > 0 {
+		p.Title = ""
+		for _, pid := range pids {
+			p.Id = pid
+			err := p.AddVideoToPlaylist(srv, id)
+			if err != nil {
+				log.Fatalf("Error adding video to playlist: %s", err)
+			}
+		}
+	}
+}
+
+func addToPlaylistTitles(srv *youtube.Service, pnams []string, sta string, id string) {
+	p := Playlistx{}
+	if sta != "" {
+		p.PrivacyStatus = sta
+	}
+	if len(pnams) > 0 {
+		p.Id = ""
+		for _, nam := range pnams {
+			p.Title = nam
+			err := p.AddVideoToPlaylist(srv, id)
+			if err != nil {
+				log.Fatalf("Error adding video to playlist: %s", err)
+			}
+		}
+	}
+}
+
 // Search video by title (exact text)
 func searchTitle(service *youtube.Service, text *string) {
 	call, err := service.Search.List("snippet").Type("video").Q(*text).Do()
@@ -383,39 +417,7 @@ func main() {
 	fmt.Printf("Upload successful! Video ID: %v\n", video.Id)
 	uploadThumbnail(service, video.Id, f.Thumbnail, thumbnailFile)
 	uploadCaption(service, video.Id, f.Caption, captionFile)
-
-	plx := &Playlistx{}
-	if upload.Status.PrivacyStatus != "" {
-		plx.PrivacyStatus = upload.Status.PrivacyStatus
-	}
-	// PlaylistID is deprecated in favour of PlaylistIDs
-	if videoMeta.PlaylistID != "" {
-		plx.Id = videoMeta.PlaylistID
-		err = plx.AddVideoToPlaylist(service, video.Id)
-		if err != nil {
-			log.Fatalf("Error adding video to playlist: %s", err)
-		}
-	}
-
-	if len(videoMeta.PlaylistIDs) > 0 {
-		plx.Title = ""
-		for _, pid := range videoMeta.PlaylistIDs {
-			plx.Id = pid
-			err = plx.AddVideoToPlaylist(service, video.Id)
-			if err != nil {
-				log.Fatalf("Error adding video to playlist: %s", err)
-			}
-		}
-	}
-
-	if len(videoMeta.PlaylistTitles) > 0 {
-		plx.Id = ""
-		for _, title := range videoMeta.PlaylistTitles {
-			plx.Title = title
-			err = plx.AddVideoToPlaylist(service, video.Id)
-			if err != nil {
-				log.Fatalf("Error adding video to playlist: %s", err)
-			}
-		}
-	}
+	addToPlaylistID(service, videoMeta.PlaylistID, upload.Status.PrivacyStatus, video.Id)
+	addToPlaylistIDs(service, videoMeta.PlaylistIDs, upload.Status.PrivacyStatus, video.Id)
+	addToPlaylistTitles(service, videoMeta.PlaylistTitles, upload.Status.PrivacyStatus, video.Id)
 }
