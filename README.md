@@ -13,6 +13,7 @@ _^ The binaries are compressed so you need to unpack them and give them executab
 
 ## Build
 
+http://gnuwin32.sourceforge.net/packages/zip.htm
 This project uses ['dep'](https://github.com/golang/dep) for [vendoring](https://blog.gopheracademy.com/advent-2015/vendor-folder/).
 
 - Install Go e.g. `yum install golang` or `apt-get install golang`
