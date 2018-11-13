@@ -230,6 +230,39 @@ func onTitle(srv *youtube.Service, txt string) {
 	}
 }
 
+func updateFlags(f *Flags) {
+	if f.Title == "" {
+		f.Title = f.Video
+	}
+	if f.Description == "" {
+		f.Description = f.Video
+	}
+}
+
+func updateMeta(m *youtube.Video, f *Flags) {
+	if m.Status.PrivacyStatus == "" {
+		m.Status.PrivacyStatus = f.PrivacyStatus
+	}
+	if m.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
+		m.Snippet.Tags = strings.Split(f.Tags, ",")
+	}
+	if m.Snippet.Title == "" {
+		m.Snippet.Title = f.Title
+	}
+	if m.Snippet.Description == "" {
+		m.Snippet.Description = f.Description
+	}
+	if m.Snippet.CategoryId == "" && f.Category != "" {
+		m.Snippet.CategoryId = f.Category
+	}
+	if m.Snippet.DefaultLanguage == "" && f.Language != "" {
+		m.Snippet.DefaultLanguage = f.Language
+	}
+	if m.Snippet.DefaultAudioLanguage == "" && f.Language != "" {
+		m.Snippet.DefaultAudioLanguage = f.Language
+	}
+}
+
 func uploadVideo(srv *youtube.Service, nam string, fil io.ReadCloser, obj *youtube.Video, cnk int, cquit chanChan) *youtube.Video {
 	fmt.Printf("Uploading file '%s'...\n", nam)
 	opt := googleapi.ChunkSize(cnk)
@@ -339,10 +372,6 @@ func addToPlaylistTitles(srv *youtube.Service, pnams []string, sta string, id st
 
 // Main.
 func main() {
-	// var videoFile io.ReadCloser
-	// var fileSize int64
-	var err error
-
 	getEnv(&f)
 	getFlags(&f)
 	onVersion(&f)
@@ -382,37 +411,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating YouTube client: %s", err)
 	}
-
 	// search video by title
 	if f.Video == "" && f.Title != "" {
 		onTitle(service, f.Title)
 		os.Exit(0)
 	}
-	if f.Title == "" {
-		f.Title = "Video title"
-	}
-
-	if upload.Status.PrivacyStatus == "" {
-		upload.Status.PrivacyStatus = f.PrivacyStatus
-	}
-	if upload.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
-		upload.Snippet.Tags = strings.Split(f.Tags, ",")
-	}
-	if upload.Snippet.Title == "" {
-		upload.Snippet.Title = f.Title
-	}
-	if upload.Snippet.Description == "" {
-		upload.Snippet.Description = f.Description
-	}
-	if upload.Snippet.CategoryId == "" && f.Category != "" {
-		upload.Snippet.CategoryId = f.Category
-	}
-	if upload.Snippet.DefaultLanguage == "" && f.Language != "" {
-		upload.Snippet.DefaultLanguage = f.Language
-	}
-	if upload.Snippet.DefaultAudioLanguage == "" && f.Language != "" {
-		upload.Snippet.DefaultAudioLanguage = f.Language
-	}
+	updateFlags(&f)
+	updateMeta(upload, &f)
 	video := uploadVideo(service, f.Video, videoFile, upload, f.UploadChunk, quitChan)
 	uploadThumbnail(service, video.Id, f.Thumbnail, thumbnailFile)
 	uploadCaption(service, video.Id, f.Caption, captionFile)
