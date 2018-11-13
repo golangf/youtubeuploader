@@ -1,37 +1,20 @@
-/*
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"flag"
-	"fmt"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strconv"
-	"time"
-
-	"golang.org/x/oauth2"
-)
+import "golang.org/x/oauth2"
+import "encoding/json"
+import "path/filepath"
+import "io/ioutil"
+import "net/http"
+import "os/exec"
+import "context"
+import "runtime"
+import "strconv"
+import "errors"
+import "flag"
+import "time"
+import "fmt"
+import "net"
+import "os"
 
 const missingClientSecretsMessage = `
 Please configure OAuth 2.0
