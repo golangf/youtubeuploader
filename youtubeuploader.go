@@ -208,6 +208,43 @@ func onHelp(f *Flags) {
 	}
 }
 
+func uploadThumbnail(srv *youtube.Service, id string, nam string, fil io.ReadCloser) {
+	if fil != nil {
+		log.Printf("Uploading thumbnail '%s'...\n", nam)
+		res, err := srv.Thumbnails.Set(id).Media(fil).Do()
+		if err != nil {
+			if res != nil {
+				log.Fatalf("Error uploading thumbnail: %v, %v", err, res.HTTPStatusCode)
+			} else {
+				log.Fatalf("Error uploading thumbnail: %v", err)
+			}
+		}
+		fmt.Printf("Thumbnail uploaded!\n")
+	}
+}
+
+func uploadCaption(srv *youtube.Service, id string, nam string, fil io.ReadCloser) {
+	if fil != nil {
+		c := &youtube.Caption{
+			Snippet: &youtube.CaptionSnippet{},
+		}
+		c.Snippet.VideoId = id
+		c.Snippet.Language = f.Language
+		c.Snippet.Name = f.Language
+		log.Printf("Uploading caption '%s'...\n", nam)
+		req := srv.Captions.Insert("snippet", c).Sync(true)
+		res, err := req.Media(fil).Do()
+		if err != nil {
+			if res != nil {
+				log.Fatalf("Error uploading caption: %v, %v", err, res.HTTPStatusCode)
+			} else {
+				log.Fatalf("Error uploading caption: %v", err)
+			}
+		}
+		fmt.Printf("Caption uploaded!\n")
+	}
+}
+
 // Search video by title (exact text)
 func searchTitle(service *youtube.Service, text *string) {
 	call, err := service.Search.List("snippet").Type("video").Q(*text).Do()
@@ -329,35 +366,8 @@ func main() {
 		}
 	}
 	fmt.Printf("Upload successful! Video ID: %v\n", video.Id)
-
-	if thumbnailFile != nil {
-		log.Printf("Uploading thumbnail '%s'...\n", f.Thumbnail)
-		_, err = service.Thumbnails.Set(video.Id).Media(thumbnailFile).Do()
-		if err != nil {
-			log.Fatalf("Error making YouTube API call: %v", err)
-		}
-		fmt.Printf("Thumbnail uploaded!\n")
-	}
-
-	// Insert caption
-	if captionFile != nil {
-		captionObj := &youtube.Caption{
-			Snippet: &youtube.CaptionSnippet{},
-		}
-		captionObj.Snippet.VideoId = video.Id
-		captionObj.Snippet.Language = f.Language
-		captionObj.Snippet.Name = f.Language
-		captionInsert := service.Captions.Insert("snippet", captionObj).Sync(true)
-		captionRes, err := captionInsert.Media(captionFile).Do()
-		if err != nil {
-			if captionRes != nil {
-				log.Fatalf("Error inserting caption: %v, %v", err, captionRes.HTTPStatusCode)
-			} else {
-				log.Fatalf("Error inserting caption: %v", err)
-			}
-		}
-		fmt.Printf("Caption uploaded!\n")
-	}
+	uploadThumbnail(service, video.Id, f.Thumbnail, thumbnailFile)
+	uploadCaption(service, video.Id, f.Caption, captionFile)
 
 	plx := &Playlistx{}
 	if upload.Status.PrivacyStatus != "" {
