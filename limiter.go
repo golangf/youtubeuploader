@@ -17,7 +17,7 @@ type limitChecker struct {
 
 func (lc *limitChecker) Read(p []byte) (n int, err error) {
 	if lc.start.IsZero() || lc.end.IsZero() {
-		lc.reader.SetLimit(int64(f.UploadRate * 125))
+		lc.reader.SetLimit(int64(parseInt(f.UploadRate, 0) * 125))
 		return lc.reader.Read(p)
 	}
 
@@ -30,7 +30,7 @@ func (lc *limitChecker) Read(p []byte) (n int, err error) {
 
 	if lc.start.Before(now) && lc.end.After(now) {
 		// kbit/s to B/s = 1000/8 = 125
-		lc.reader.SetLimit(int64(f.UploadRate * 125))
+		lc.reader.SetLimit(int64(parseInt(f.UploadRate, 0) * 125))
 	} else {
 		lc.reader.SetLimit(0)
 	}
