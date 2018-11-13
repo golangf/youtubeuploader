@@ -1,12 +1,17 @@
+# Credentials
 *.json
 *.token
+
+# Video files
 *.mp4
 *.avi
 *.mkv
+
+# Build files
+sha256-checksums
+youtubeuploader
+vendor
 *.gz
 *.zip
 *.exe
 .*.swp
-vendor
-youtubeuploader
-sha256-checksums
