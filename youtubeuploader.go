@@ -245,6 +245,21 @@ func uploadCaption(srv *youtube.Service, id string, nam string, fil io.ReadClose
 	}
 }
 
+func addToPlaylistID(srv *youtube.Service, pid string, sta string, id string) {
+	p := Playlistx{}
+	if sta != "" {
+		p.PrivacyStatus = sta
+	}
+	// PlaylistID is deprecated in favour of PlaylistIDs
+	if pid != "" {
+		p.Id = pid
+		err := p.AddVideoToPlaylist(srv, id)
+		if err != nil {
+			log.Fatalf("Error adding video to playlist: %s", err)
+		}
+	}
+}
+
 // Search video by title (exact text)
 func searchTitle(service *youtube.Service, text *string) {
 	call, err := service.Search.List("snippet").Type("video").Q(*text).Do()
