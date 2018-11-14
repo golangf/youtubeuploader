@@ -89,7 +89,7 @@ func main() {
 		onTitle(service, f.Title)
 		os.Exit(0)
 	}
-	updateMeta(upload, &f)
+	updateMeta(upload)
 	video := uploadVideo(service, f.Video, videoFile, upload, parseInt(f.UploadChunk, 0), quitChan)
 	uploadThumbnail(service, video.Id, f.Thumbnail, thumbnailFile)
 	uploadCaption(service, video.Id, f.Caption, captionFile)

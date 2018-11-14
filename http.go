@@ -83,7 +83,7 @@ func (plx *Playlistx) AddVideoToPlaylist(service *youtube.Service, videoID strin
 	listCall = listCall.Mine(true)
 	response, err := listCall.Do()
 	if err != nil {
-		return fmt.Errorf("error retrieving playlists: %s", err)
+		return fmt.Errorf("Error retrieving playlists: %s", err)
 	}
 
 	var playlist *youtube.Playlist
@@ -97,7 +97,7 @@ func (plx *Playlistx) AddVideoToPlaylist(service *youtube.Service, videoID strin
 	// create playlist if it doesn't exist
 	if playlist == nil {
 		if plx.Id != "" {
-			return fmt.Errorf("playlist ID '%s' doesn't exist", plx.Id)
+			return fmt.Errorf("Playlist ID '%s' doesn't exist", plx.Id)
 		}
 		playlist = &youtube.Playlist{}
 		playlist.Snippet = &youtube.PlaylistSnippet{Title: plx.Title}
@@ -106,7 +106,7 @@ func (plx *Playlistx) AddVideoToPlaylist(service *youtube.Service, videoID strin
 		// API doesn't return playlist ID here!?
 		playlist, err = insertCall.Do()
 		if err != nil {
-			return fmt.Errorf("error creating playlist with title '%s': %s", plx.Title, err)
+			return fmt.Errorf("Error creating playlist with title '%s': %s", plx.Title, err)
 		}
 	}
 

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math"
 	"strings"
@@ -11,9 +12,22 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-func updateMeta(m *youtube.Video, f *appFlags) {
+//
+// Functions
+//
+func updateMeta(m *youtube.Video) {
 	if m.Snippet.Title == "" {
 		m.Snippet.Title = f.Title
+	}
+	if m.Snippet.Title == "" {
+		m.Snippet.Title = f.Video
+	}
+	if m.Snippet.Description == "" && f.DescriptionPath != "" {
+		dat, err := ioutil.ReadFile(f.DescriptionPath)
+		if err != nil {
+			log.Fatalf("Error reading description file '%v': %v", f.DescriptionPath, err)
+		}
+		m.Snippet.Description = string(dat)
 	}
 	if m.Snippet.Description == "" {
 		m.Snippet.Description = f.Description
@@ -21,37 +35,37 @@ func updateMeta(m *youtube.Video, f *appFlags) {
 	if m.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
 		m.Snippet.Tags = strings.Split(f.Tags, ",")
 	}
-	if m.Snippet.DefaultLanguage == "" && f.Language != "" {
+	if m.Snippet.DefaultLanguage == "" {
 		m.Snippet.DefaultLanguage = f.Language
 	}
-	if m.Snippet.DefaultAudioLanguage == "" && f.Language != "" {
+	if m.Snippet.DefaultAudioLanguage == "" {
 		m.Snippet.DefaultAudioLanguage = f.Language
 	}
-	if m.Snippet.CategoryId == "" && f.Category != "" {
-		m.Snippet.CategoryId = f.Category
+	if m.Snippet.CategoryId == "" {
+		m.Snippet.CategoryId = string(parseCategory(f.Category))
 	}
 	if m.Status.PrivacyStatus == "" {
 		m.Status.PrivacyStatus = f.PrivacyStatus
 	}
-	if f.License != "" {
+	if m.Status.License == "" {
 		m.Status.License = parseLicense(f.License)
 	}
-	if f.PublicStatsViewable {
+	if !m.Status.PublicStatsViewable {
 		m.Status.PublicStatsViewable = f.PublicStatsViewable
 	}
-	if f.PublishAt != "" {
+	if m.Status.PublishAt == "" {
 		m.Status.PublishAt = f.PublishAt
 	}
-	if f.RecordingDate != "" {
+	if m.RecordingDetails.RecordingDate == "" {
 		m.RecordingDetails.RecordingDate = f.RecordingDate
 	}
-	if f.LocationLatitude != "" {
+	if math.IsNaN(m.RecordingDetails.Location.Latitude) {
 		m.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, math.NaN())
 	}
-	if f.LocationLongitude != "" {
+	if math.IsNaN(m.RecordingDetails.Location.Longitude) {
 		m.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, math.NaN())
 	}
-	if f.LocationDescription != "" {
+	if m.RecordingDetails.LocationDescription == "" {
 		m.RecordingDetails.LocationDescription = f.LocationDescription
 	}
 }

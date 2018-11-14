@@ -109,11 +109,29 @@ func getFlags() {
 		flag.StringVar(sf.Value, k, "", sf.Usage)
 	}
 	flag.Parse()
+	if f.ClientID == "" {
+		f.ClientID = "client_id.json"
+	}
+	if f.ClientToken == "" {
+		f.ClientToken = "client_token.json"
+	}
 	if f.Title == "" {
 		f.Title = f.Video
 	}
 	if f.Description == "" {
 		f.Description = f.Video
+	}
+	if f.Language == "" {
+		f.Language = "en"
+	}
+	if f.Category == "" {
+		f.Category = string(defCategoryID)
+	}
+	if f.PrivacyStatus == "" {
+		f.PrivacyStatus = "private"
+	}
+	if f.AuthPort == "" {
+		f.AuthPort = "8080"
 	}
 }
 

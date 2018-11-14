@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -21,7 +20,7 @@ import (
 const missingClientSecretsMessage = `
 Please configure OAuth 2.0
 
-To make this sample run, you need to populate the client_secrets.json file
+To make this sample run, you need to populate the client_id.json file
 found at:
 
    %v
@@ -29,13 +28,13 @@ found at:
 with information from the {{ Google Cloud Console }}
 {{ https://cloud.google.com/console }}
 
-For more information about the client_secrets.json file format, please visit:
+For more information about the client_id.json file format, please visit:
 https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 `
 
 var (
-	clientSecretsFile = flag.String("secrets", "client_secrets.json", "Client Secrets configuration")
-	cache             = flag.String("cache", "request.token", "Token cache file")
+	clientSecretsFile = &f.ClientID
+	cache             = &f.ClientToken
 )
 
 // CallbackStatus is returned from the oauth2 callback
