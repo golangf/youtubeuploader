@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -75,8 +76,40 @@ func updateUpload(y *youtube.Video) {
 	}
 }
 
-func uploadVideo(srv *youtube.Service, nam string, fil io.ReadCloser, obj *youtube.Video, cnk int, cquit chanChan) *youtube.Video {
-	logf("Uploading file '%s'...\n", nam)
+func searchVideoTitle(srv *youtube.Service, txt string) []string {
+	res, err := srv.Search.List("snippet").Type("video").Q(txt).Do()
+	if err != nil {
+		if res != nil {
+			log.Fatalf("Error searching video title  '%v': %v, %v", txt, err, res.HTTPStatusCode)
+		} else {
+			log.Fatalf("Error searching video title '%v': %v", txt, err)
+		}
+	}
+	var ans = []string{}
+	var re = regexp.MustCompile("\\W")
+	var ta = strings.ToLower(re.ReplaceAllString(txt, ""))
+	for _, item := range res.Items {
+		var tb = strings.ToLower(re.ReplaceAllString(item.Snippet.Title, ""))
+		if ta == tb {
+			ans = append(ans, item.Id.VideoId)
+		}
+	}
+	return ans
+}
+
+func updateVideo(srv *youtube.Service, id string, obj *youtube.Video) {
+	obj.Id = id
+	res, err := srv.Videos.Update("snippet,status,recordingDetails", obj).Do()
+	if err != nil {
+		if res != nil {
+			log.Fatalf("Error updating video: %v, %v", err, res.HTTPStatusCode)
+		} else {
+			log.Fatalf("Error updating video: %v", err)
+		}
+	}
+}
+
+func uploadVideo(srv *youtube.Service, fil io.ReadCloser, obj *youtube.Video, cnk int, cquit chanChan) *youtube.Video {
 	opt := googleapi.ChunkSize(cnk)
 	req := srv.Videos.Insert("snippet,status,recordingDetails", obj)
 	res, err := req.Media(fil, opt).Do()
@@ -92,67 +125,52 @@ func uploadVideo(srv *youtube.Service, nam string, fil io.ReadCloser, obj *youtu
 			log.Fatalf("Error making YouTube API call: %v", err)
 		}
 	}
-	logf("Upload successful! Video ID: %v\n", res.Id)
 	return res
 }
 
-func uploadThumbnail(srv *youtube.Service, id string, nam string, fil io.ReadCloser) {
-	if fil != nil {
-		logf("Uploading thumbnail '%s'...\n", nam)
-		res, err := srv.Thumbnails.Set(id).Media(fil).Do()
-		if err != nil {
-			if res != nil {
-				log.Fatalf("Error uploading thumbnail: %v, %v", err, res.HTTPStatusCode)
-			} else {
-				log.Fatalf("Error uploading thumbnail: %v", err)
-			}
+func uploadThumbnail(srv *youtube.Service, id string, fil io.ReadCloser) {
+	res, err := srv.Thumbnails.Set(id).Media(fil).Do()
+	if err != nil {
+		if res != nil {
+			log.Fatalf("Error uploading thumbnail: %v, %v", err, res.HTTPStatusCode)
+		} else {
+			log.Fatalf("Error uploading thumbnail: %v", err)
 		}
-		logf("Thumbnail uploaded!\n")
 	}
 }
 
-func uploadCaption(srv *youtube.Service, id string, nam string, fil io.ReadCloser) {
-	if fil != nil {
-		c := &youtube.Caption{
-			Snippet: &youtube.CaptionSnippet{},
+func uploadCaption(srv *youtube.Service, id string, fil io.ReadCloser) {
+	c := &youtube.Caption{
+		Snippet: &youtube.CaptionSnippet{},
+	}
+	c.Snippet.VideoId = id
+	c.Snippet.Language = f.Language
+	c.Snippet.Name = f.Language
+	req := srv.Captions.Insert("snippet", c).Sync(true)
+	res, err := req.Media(fil).Do()
+	if err != nil {
+		if res != nil {
+			log.Fatalf("Error uploading caption: %v, %v", err, res.HTTPStatusCode)
+		} else {
+			log.Fatalf("Error uploading caption: %v", err)
 		}
-		c.Snippet.VideoId = id
-		c.Snippet.Language = f.Language
-		c.Snippet.Name = f.Language
-		logf("Uploading caption '%s'...\n", nam)
-		req := srv.Captions.Insert("snippet", c).Sync(true)
-		res, err := req.Media(fil).Do()
-		if err != nil {
-			if res != nil {
-				log.Fatalf("Error uploading caption: %v, %v", err, res.HTTPStatusCode)
-			} else {
-				log.Fatalf("Error uploading caption: %v", err)
-			}
-		}
-		logf("Caption uploaded!\n")
 	}
 }
 
 func addToPlaylistID(srv *youtube.Service, pid string, sta string, id string) {
 	p := Playlistx{}
-	if sta != "" {
-		p.PrivacyStatus = sta
-	}
+	p.PrivacyStatus = sta
 	// PlaylistID is deprecated in favour of PlaylistIDs
-	if pid != "" {
-		p.Id = pid
-		err := p.AddVideoToPlaylist(srv, id)
-		if err != nil {
-			log.Fatalf("Error adding video to playlist: %s", err)
-		}
+	p.Id = pid
+	err := p.AddVideoToPlaylist(srv, id)
+	if err != nil {
+		log.Fatalf("Error adding video to playlist: %s", err)
 	}
 }
 
 func addToPlaylistIDs(srv *youtube.Service, pids []string, sta string, id string) {
 	p := Playlistx{}
-	if sta != "" {
-		p.PrivacyStatus = sta
-	}
+	p.PrivacyStatus = sta
 	if len(pids) > 0 {
 		p.Title = ""
 		for _, pid := range pids {

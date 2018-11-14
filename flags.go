@@ -16,6 +16,7 @@ type appFlags struct {
 	Help                bool
 	Version             bool
 	Log                 bool
+	Id                  string
 	Video               string
 	Thumbnail           string
 	Caption             string
@@ -67,6 +68,7 @@ var fBool = map[string]boolFlag{
 	"auth_headless":       {"ah", "enable browserless OAuth process", &f.AuthHeadless},
 }
 var fString = map[string]stringFlag{
+	"id":                  {"i", "set video id", &f.Id},
 	"video":               {"v", "set input video file", &f.Video},
 	"thumbnail":           {"t", "set input thumbnail file", &f.Thumbnail},
 	"caption":             {"c", "set input caption file", &f.Caption},

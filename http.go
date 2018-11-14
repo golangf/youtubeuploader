@@ -9,8 +9,9 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-const inputTimeLayout = "15:04"
-
+//
+// Types
+//
 type limitTransport struct {
 	rt       http.RoundTripper
 	lr       limitRange
@@ -52,6 +53,14 @@ type VideoMeta struct {
 	Language string `json:"language,omitempty"`
 }
 
+//
+// Global constants
+//
+const inputTimeLayout = "15:04"
+
+//
+// Functions
+//
 func (t *limitTransport) RoundTrip(r *http.Request) (res *http.Response, err error) {
 	// Content-Type starts with 'multipart/related' where chunksize >= filesize (including chunksize 0)
 	// and 'video' for other chunksizes
