@@ -99,7 +99,6 @@ func main() {
 		os.Exit(0)
 	}
 	updateUpload(upload)
-	logFlags()
 	logUpload(upload)
 	video := uploadVideo(service, f.Video, videoFile, upload, parseInt(f.UploadChunk, 0), quitChan)
 	uploadThumbnail(service, video.Id, f.Thumbnail, thumbnailFile)

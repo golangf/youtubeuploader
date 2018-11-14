@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	youtube "google.golang.org/api/youtube/v3"
 )
@@ -24,37 +25,61 @@ func logfString(msg string, val string) {
 	}
 }
 
-func logFlags() {
-	if !f.Log {
-		return
+func videoBasics(o *youtube.Video) string {
+	var ans = ""
+	p := o.Snippet
+	s := o.Status
+	if p.DefaultLanguage != "" {
+		ans += fmt.Sprintf(", &%v", p.DefaultLanguage)
 	}
-	printfString("Video: %v\n", f.Video)
-	printfString("Thumbnail: %v\n", f.Thumbnail)
-	printfString("Caption: %v\n", f.Caption)
-	printfString("Description Path: %v\n", f.DescriptionPath)
-	printfString("Meta: %v\n", f.Meta)
-	printfString("Client ID: %v\n", f.ClientID)
-	printfString("Client Token: %v\n", f.ClientToken)
+	if p.CategoryId != "" {
+		ans += fmt.Sprintf(", #%v", p.CategoryId)
+	}
+	if s.PrivacyStatus != "" {
+		ans += fmt.Sprintf(", :%v", s.PrivacyStatus)
+	}
+	if s.License != "" {
+		ans += fmt.Sprintf(", $%v", s.License)
+	} else {
+		ans += fmt.Sprintf(", $%v", "standard")
+	}
+	if s.PublicStatsViewable {
+		ans += ", public stats"
+	} else {
+		ans += ", private stats"
+	}
+	if s.PublishAt != "" {
+		ans += fmt.Sprintf(", T:%v", s.PublishAt)
+	}
+	if ans != "" {
+		ans = ans[2:]
+	}
+	return ans
+}
+
+func videoRecordingDetails(o *youtube.VideoRecordingDetails) string {
+	var ans = ""
+	if o.LocationDescription != "" {
+		ans += fmt.Sprintf(" \"%v\"", o.LocationDescription)
+	}
+	if o.Location != nil {
+		ans += fmt.Sprintf(" (%v, %v)", o.Location.Latitude, o.Location.Longitude)
+	}
+	if o.RecordingDate != "" {
+		ans += fmt.Sprintf(" on %v", o.RecordingDate)
+	}
+	return ans
 }
 
 func logUpload(y *youtube.Video) {
 	if !f.Log {
 		return
 	}
-	printfString("Title: %v\n", y.Snippet.Title)
-	printfString("%v\n", shortString(y.Snippet.Description, 256))
-	fmt.Printf("Tags: %v\n", y.Snippet.Tags)
-	printfString("Default Language: %v\n", y.Snippet.DefaultLanguage)
-	printfString("Default Audio Language: %v\n", y.Snippet.DefaultAudioLanguage)
-	printfString("Category ID: %v\n", y.Snippet.CategoryId)
-	printfString("Privacy Status: %v\n", y.Status.PrivacyStatus)
-	printfString("License: %v\n", y.Status.License)
-	fmt.Printf("Public Stats Viewable: %v\n", y.Status.PublicStatsViewable)
-	printfString("Publist At: %v\n", y.Status.PublishAt)
-	printfString("Recording Date: %v\n", y.RecordingDetails.RecordingDate)
-	if y.RecordingDetails.Location != nil {
-		fmt.Printf("Location Latitude: %v\n", y.RecordingDetails.Location.Latitude)
-		fmt.Printf("Location Longitude: %v\n", y.RecordingDetails.Location.Longitude)
-	}
-	printfString("Location Description: %v\n", y.RecordingDetails.LocationDescription)
+	fmt.Printf("%v\n", y.Snippet.Title)
+	fmt.Printf(" - %v\n", videoBasics(y))
+	printfString(" @%v\n", videoRecordingDetails(y.RecordingDetails))
+	fmt.Printf(" - %v\n", shortString(strings.Join(y.Snippet.Tags, ","), 60))
+	printfString("\n%v\n\n", shortString(y.Snippet.Description, 256))
+	printfString(" -> id: %v\n", f.ClientID)
+	printfString(" -> token: %v\n\n", f.ClientToken)
 }
