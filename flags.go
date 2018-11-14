@@ -1,8 +1,11 @@
 package main
 
-import "strings"
-import "flag"
-import "os"
+import (
+	"flag"
+	"fmt"
+	"os"
+	"strings"
+)
 
 //
 // Types
@@ -112,4 +115,17 @@ func getFlags() {
 	if f.Description == "" {
 		f.Description = f.Video
 	}
+}
+
+func getUploadTime() limitRange {
+	var ans limitRange
+	var err error
+	if f.UploadTime != "" {
+		ans, err = parseLimitBetween(f.UploadTime)
+		if err != nil {
+			fmt.Printf("Invalid upload time: %v", err)
+			os.Exit(1)
+		}
+	}
+	return ans
 }

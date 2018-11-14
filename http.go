@@ -1,10 +1,13 @@
 package main
 
-import "github.com/porjo/go-flowrate/flowrate"
-import "google.golang.org/api/youtube/v3"
-import "net/http"
-import "strings"
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/porjo/go-flowrate/flowrate"
+	"google.golang.org/api/youtube/v3"
+)
 
 const inputTimeLayout = "15:04"
 

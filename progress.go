@@ -1,8 +1,10 @@
 package main
 
-import "strings"
-import "time"
-import "fmt"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 func Progress(quitChan chanChan, transport *limitTransport, filesize int64) {
 	ticker := time.Tick(time.Second)

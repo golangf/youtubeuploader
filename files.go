@@ -1,15 +1,19 @@
 package main
 
-import "google.golang.org/api/youtube/v3"
-import "encoding/json"
-import "io/ioutil"
-import "net/http"
-import "strconv"
-import "strings"
-import "time"
-import "fmt"
-import "io"
-import "os"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"google.golang.org/api/youtube/v3"
+)
 
 const ytDateLayout = "2006-01-02T15:04:05.000Z" // ISO 8601 (YYYY-MM-DDThh:mm:ss.sssZ)
 const inputDateLayout = "2006-01-02"
@@ -154,4 +158,18 @@ func (d *Date) UnmarshalJSON(b []byte) (err error) {
 		d.Time, err = time.Parse(inputDateLayout, s)
 	}
 	return
+}
+
+func openFile(nam string) (io.ReadCloser, int64) {
+	var fil io.ReadCloser
+	var siz int64
+	var err error
+	if nam != "" {
+		fil, siz, err = Open(nam)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer fil.Close()
+	}
+	return fil, siz
 }

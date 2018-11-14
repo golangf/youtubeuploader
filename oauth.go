@@ -1,20 +1,22 @@
 package main
 
-import "golang.org/x/oauth2"
-import "encoding/json"
-import "path/filepath"
-import "io/ioutil"
-import "net/http"
-import "os/exec"
-import "context"
-import "runtime"
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"net"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"time"
 
-import "errors"
-import "flag"
-import "time"
-import "fmt"
-import "net"
-import "os"
+	"golang.org/x/oauth2"
+)
 
 const missingClientSecretsMessage = `
 Please configure OAuth 2.0

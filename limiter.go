@@ -1,9 +1,12 @@
 package main
 
-import "github.com/porjo/go-flowrate/flowrate"
-import "strings"
-import "time"
-import "fmt"
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/porjo/go-flowrate/flowrate"
+)
 
 type limitRange struct {
 	start time.Time
