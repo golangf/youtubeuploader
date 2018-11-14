@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"math"
+	"strconv"
 	"strings"
 
 	"google.golang.org/api/googleapi"
@@ -15,68 +15,68 @@ import (
 //
 // Functions
 //
-func updateMeta(m *youtube.Video) {
-	if m.Snippet.Title == "" {
-		m.Snippet.Title = f.Title
+func updateUpload(y *youtube.Video) {
+	if y.Snippet.Title == "" {
+		y.Snippet.Title = f.Title
 	}
-	if m.Snippet.Title == "" {
-		m.Snippet.Title = f.Video
+	if y.Snippet.Title == "" {
+		y.Snippet.Title = f.Video
 	}
-	if m.Snippet.Description == "" && f.DescriptionPath != "" {
+	if y.Snippet.Description == "" && f.DescriptionPath != "" {
 		dat, err := ioutil.ReadFile(f.DescriptionPath)
 		if err != nil {
 			log.Fatalf("Error reading description file '%v': %v", f.DescriptionPath, err)
 		}
-		m.Snippet.Description = string(dat)
+		y.Snippet.Description = string(dat)
 	}
-	if m.Snippet.Description == "" {
-		m.Snippet.Description = f.Description
+	if y.Snippet.Description == "" {
+		y.Snippet.Description = f.Description
 	}
-	if m.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
-		m.Snippet.Tags = strings.Split(f.Tags, ",")
+	if y.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
+		y.Snippet.Tags = strings.Split(f.Tags, ",")
 	}
-	if m.Snippet.DefaultLanguage == "" {
-		m.Snippet.DefaultLanguage = f.Language
+	if y.Snippet.DefaultLanguage == "" {
+		y.Snippet.DefaultLanguage = f.Language
 	}
-	if m.Snippet.DefaultAudioLanguage == "" {
-		m.Snippet.DefaultAudioLanguage = f.Language
+	if y.Snippet.DefaultAudioLanguage == "" {
+		y.Snippet.DefaultAudioLanguage = f.Language
 	}
-	if m.Snippet.CategoryId == "" {
-		m.Snippet.CategoryId = string(parseCategory(f.Category))
+	if y.Snippet.CategoryId == "" {
+		y.Snippet.CategoryId = strconv.Itoa(parseCategory(f.Category))
 	}
-	if m.Status.PrivacyStatus == "" {
-		m.Status.PrivacyStatus = f.PrivacyStatus
+	if y.Status.PrivacyStatus == "" {
+		y.Status.PrivacyStatus = f.PrivacyStatus
 	}
-	if m.Status.License == "" {
-		m.Status.License = parseLicense(f.License)
+	if y.Status.License == "" {
+		y.Status.License = parseLicense(f.License)
 	}
-	if !m.Status.PublicStatsViewable {
-		m.Status.PublicStatsViewable = f.PublicStatsViewable
+	if !y.Status.PublicStatsViewable {
+		y.Status.PublicStatsViewable = f.PublicStatsViewable
 	}
-	if m.Status.PublishAt == "" {
-		m.Status.PublishAt = f.PublishAt
+	if y.Status.PublishAt == "" {
+		y.Status.PublishAt = f.PublishAt
 	}
-	if m.RecordingDetails.RecordingDate == "" {
-		m.RecordingDetails.RecordingDate = f.RecordingDate
+	if y.RecordingDetails.RecordingDate == "" {
+		y.RecordingDetails.RecordingDate = f.RecordingDate
 	}
 	if f.LocationLatitude != "" && f.LocationLongitude != "" {
-		if m.RecordingDetails.Location == nil {
-			m.RecordingDetails.Location = &youtube.GeoPoint{}
+		if y.RecordingDetails.Location == nil {
+			y.RecordingDetails.Location = &youtube.GeoPoint{}
 		}
-		if math.IsNaN(m.RecordingDetails.Location.Latitude) {
-			m.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, math.NaN())
+		if math.IsNaN(y.RecordingDetails.Location.Latitude) {
+			y.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, math.NaN())
 		}
-		if math.IsNaN(m.RecordingDetails.Location.Longitude) {
-			m.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, math.NaN())
+		if math.IsNaN(y.RecordingDetails.Location.Longitude) {
+			y.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, math.NaN())
 		}
 	}
-	if m.RecordingDetails.LocationDescription == "" {
-		m.RecordingDetails.LocationDescription = f.LocationDescription
+	if y.RecordingDetails.LocationDescription == "" {
+		y.RecordingDetails.LocationDescription = f.LocationDescription
 	}
 }
 
 func uploadVideo(srv *youtube.Service, nam string, fil io.ReadCloser, obj *youtube.Video, cnk int, cquit chanChan) *youtube.Video {
-	fmt.Printf("Uploading file '%s'...\n", nam)
+	logf("Uploading file '%s'...\n", nam)
 	opt := googleapi.ChunkSize(cnk)
 	req := srv.Videos.Insert("snippet,status,recordingDetails", obj)
 	res, err := req.Media(fil, opt).Do()
@@ -92,13 +92,13 @@ func uploadVideo(srv *youtube.Service, nam string, fil io.ReadCloser, obj *youtu
 			log.Fatalf("Error making YouTube API call: %v", err)
 		}
 	}
-	fmt.Printf("Upload successful! Video ID: %v\n", res.Id)
+	logf("Upload successful! Video ID: %v\n", res.Id)
 	return res
 }
 
 func uploadThumbnail(srv *youtube.Service, id string, nam string, fil io.ReadCloser) {
 	if fil != nil {
-		log.Printf("Uploading thumbnail '%s'...\n", nam)
+		logf("Uploading thumbnail '%s'...\n", nam)
 		res, err := srv.Thumbnails.Set(id).Media(fil).Do()
 		if err != nil {
 			if res != nil {
@@ -107,7 +107,7 @@ func uploadThumbnail(srv *youtube.Service, id string, nam string, fil io.ReadClo
 				log.Fatalf("Error uploading thumbnail: %v", err)
 			}
 		}
-		fmt.Printf("Thumbnail uploaded!\n")
+		logf("Thumbnail uploaded!\n")
 	}
 }
 
@@ -119,7 +119,7 @@ func uploadCaption(srv *youtube.Service, id string, nam string, fil io.ReadClose
 		c.Snippet.VideoId = id
 		c.Snippet.Language = f.Language
 		c.Snippet.Name = f.Language
-		log.Printf("Uploading caption '%s'...\n", nam)
+		logf("Uploading caption '%s'...\n", nam)
 		req := srv.Captions.Insert("snippet", c).Sync(true)
 		res, err := req.Media(fil).Do()
 		if err != nil {
@@ -129,7 +129,7 @@ func uploadCaption(srv *youtube.Service, id string, nam string, fil io.ReadClose
 				log.Fatalf("Error uploading caption: %v", err)
 			}
 		}
-		fmt.Printf("Caption uploaded!\n")
+		logf("Caption uploaded!\n")
 	}
 }
 

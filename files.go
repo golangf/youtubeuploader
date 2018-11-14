@@ -25,7 +25,7 @@ type Date struct {
 }
 
 // LoadVideoMeta loads metaJSON
-func LoadVideoMeta(filename string, video *youtube.Video) (videoMeta VideoMeta) {
+func LoadVideoMeta(filename string, y *youtube.Video) (m VideoMeta) {
 	// attempt to load from meta JSON, otherwise use values specified from command line flags
 	if filename != "" {
 		file, e := ioutil.ReadFile(filename)
@@ -35,77 +35,59 @@ func LoadVideoMeta(filename string, video *youtube.Video) (videoMeta VideoMeta) 
 			goto errJump
 		}
 
-		e = json.Unmarshal(file, &videoMeta)
+		e = json.Unmarshal(file, &m)
 		if e != nil {
 			fmt.Printf("Error parsing file '%s': %s\n", filename, e)
 			fmt.Println("Will use command line flags instead")
 			goto errJump
 		}
 
-		video.Status = &youtube.VideoStatus{}
-		video.Snippet.Tags = videoMeta.Tags
-		video.Snippet.Title = videoMeta.Title
-		video.Snippet.Description = videoMeta.Description
-		video.Snippet.CategoryId = videoMeta.CategoryId
-		if videoMeta.Location != nil {
-			video.RecordingDetails.Location = videoMeta.Location
+		y.Status = &youtube.VideoStatus{}
+		y.Snippet.Tags = m.Tags
+		y.Snippet.Title = m.Title
+		y.Snippet.Description = m.Description
+		y.Snippet.CategoryId = m.CategoryId
+		if m.Location != nil {
+			y.RecordingDetails.Location = m.Location
 		}
-		if videoMeta.LocationDescription != "" {
-			video.RecordingDetails.LocationDescription = videoMeta.LocationDescription
+		if m.LocationDescription != "" {
+			y.RecordingDetails.LocationDescription = m.LocationDescription
 		}
-		if !videoMeta.RecordingDate.IsZero() {
-			video.RecordingDetails.RecordingDate = videoMeta.RecordingDate.UTC().Format(ytDateLayout)
+		if !m.RecordingDate.IsZero() {
+			y.RecordingDetails.RecordingDate = m.RecordingDate.UTC().Format(ytDateLayout)
 		}
 
 		// status
-		if videoMeta.PrivacyStatus != "" {
-			video.Status.PrivacyStatus = videoMeta.PrivacyStatus
+		if m.PrivacyStatus != "" {
+			y.Status.PrivacyStatus = m.PrivacyStatus
 		}
-		if videoMeta.Embeddable {
-			video.Status.Embeddable = videoMeta.Embeddable
+		if m.Embeddable {
+			y.Status.Embeddable = m.Embeddable
 		}
-		if videoMeta.License != "" {
-			video.Status.License = videoMeta.License
+		if m.License != "" {
+			y.Status.License = m.License
 		}
-		if videoMeta.PublicStatsViewable {
-			video.Status.PublicStatsViewable = videoMeta.PublicStatsViewable
+		if m.PublicStatsViewable {
+			y.Status.PublicStatsViewable = m.PublicStatsViewable
 		}
-		if !videoMeta.PublishAt.IsZero() {
-			if video.Status.PrivacyStatus != "private" {
+		if !m.PublishAt.IsZero() {
+			if y.Status.PrivacyStatus != "private" {
 				fmt.Printf("publishAt can only be used when privacyStatus is 'private'. Ignoring publishAt...\n")
 			} else {
-				if videoMeta.PublishAt.Before(time.Now()) {
-					fmt.Printf("publishAt (%s) was in the past!? Publishing now instead...\n", videoMeta.PublishAt)
-					video.Status.PublishAt = time.Now().UTC().Format(ytDateLayout)
+				if m.PublishAt.Before(time.Now()) {
+					fmt.Printf("publishAt (%s) was in the past!? Publishing now instead...\n", m.PublishAt)
+					y.Status.PublishAt = time.Now().UTC().Format(ytDateLayout)
 				} else {
-					video.Status.PublishAt = videoMeta.PublishAt.UTC().Format(ytDateLayout)
+					y.Status.PublishAt = m.PublishAt.UTC().Format(ytDateLayout)
 				}
 			}
 		}
-
-		if videoMeta.Language != "" {
-			video.Snippet.DefaultLanguage = videoMeta.Language
-			video.Snippet.DefaultAudioLanguage = videoMeta.Language
+		if m.Language != "" {
+			y.Snippet.DefaultLanguage = m.Language
+			y.Snippet.DefaultAudioLanguage = m.Language
 		}
 	}
 errJump:
-
-	if video.Status.PrivacyStatus == "" {
-		video.Status.PrivacyStatus = f.PrivacyStatus
-	}
-	if video.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
-		video.Snippet.Tags = strings.Split(f.Tags, ",")
-	}
-	if video.Snippet.Title == "" {
-		video.Snippet.Title = f.Title
-	}
-	if video.Snippet.Description == "" {
-		video.Snippet.Description = f.Description
-	}
-	if video.Snippet.CategoryId == "" && f.Category != "" {
-		video.Snippet.CategoryId = f.Category
-	}
-
 	return
 }
 

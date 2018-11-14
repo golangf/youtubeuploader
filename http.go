@@ -123,7 +123,7 @@ func (plx *Playlistx) AddVideoToPlaylist(service *youtube.Service, videoID strin
 		return err
 	}
 
-	fmt.Printf("Video added to playlist '%s' (%s)\n", playlist.Snippet.Title, playlist.Id)
+	logf("Video added to playlist '%s' (%s)\n", playlist.Snippet.Title, playlist.Id)
 
 	return nil
 }

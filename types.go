@@ -121,3 +121,10 @@ func parseLicense(txt string) string {
 	}
 	return "creativeCommon"
 }
+
+func shortString(txt string, max int) string {
+	if len(txt) <= max {
+		return txt
+	}
+	return txt[0:max-3] + "..."
+}
