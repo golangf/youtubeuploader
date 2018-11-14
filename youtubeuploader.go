@@ -15,17 +15,13 @@ import "log"
 import "io"
 import "os"
 
-type chanChan chan chan struct{}
-
 // Global variables
 var appVersion = ""
-var f = appFlags{}
 
 func openFile(nam string) (io.ReadCloser, int64) {
 	var fil io.ReadCloser
 	var siz int64
 	var err error
-	// open video file
 	if nam != "" {
 		fil, siz, err = Open(nam)
 		if err != nil {
@@ -34,94 +30,6 @@ func openFile(nam string) (io.ReadCloser, int64) {
 		defer fil.Close()
 	}
 	return fil, siz
-}
-
-func getEnv(f *appFlags) {
-	f.Log = os.Getenv("YOUTUBEUPLOADER_LOG")
-	f.ClientID = os.Getenv("YOUTUBEUPLOADER_CLIENT_ID")
-	f.ClientToken = os.Getenv("YOUTUBEUPLOADER_CLIENT_TOKEN")
-	f.Title = os.Getenv("YOUTUBEUPLOADER_TITLE")
-	f.Description = os.Getenv("YOUTUBEUPLOADER_DESCRIPTION")
-	f.Tags = os.Getenv("YOUTUBEUPLOADER_TAGS")
-	f.Language = os.Getenv("YOUTUBEUPLOADER_LANGUAGE")
-	f.Category = os.Getenv("YOUTUBEUPLOADER_CATEGORY")
-	f.PrivacyStatus = os.Getenv("YOUTUBEUPLOADER_PRIVACYSTATUS")
-	f.Embeddable = os.Getenv("YOUTUBEUPLOADER_EMBEDDABLE")
-	f.License = os.Getenv("YOUTUBEUPLOADER_LICENSE")
-	f.PublicStatsViewable = os.Getenv("YOUTUBEUPLOADER_PUBLICSTATSVIEWABLE")
-	f.PublishAt = os.Getenv("YOUTUBEUPLOADER_PUBLISHAT")
-	f.RecordingDate = os.Getenv("YOUTUBEUPLOADER_RECORDINGDATE")
-	f.PlaylistIds = os.Getenv("YOUTUBEUPLOADER_PLAYLISTIDS")
-	f.PlaylistTitles = os.Getenv("YOUTUBEUPLOADER_PLAYLISTTITLES")
-	f.LocationLatitude = os.Getenv("YOUTUBEUPLOADER_LOCATION_LATITUDE")
-	f.LocationLongitude = os.Getenv("YOUTUBEUPLOADER_LOCATION_LONGITUDE")
-	f.LocationDescription = os.Getenv("YOUTUBEUPLOADER_LOCATIONDESCRIPTION")
-	f.UploadChunk = os.Getenv("YOUTUBEUPLOADER_UPLOAD_CHUNK")
-	f.UploadRate = os.Getenv("YOUTUBEUPLOADER_UPLOAD_RATE")
-	f.UploadTime = os.Getenv("YOUTUBEUPLOADER_UPLOAD_TIME")
-	f.AuthPort = os.Getenv("YOUTUBEUPLOADER_AUTH_PORT")
-	f.AuthHeadless = os.Getenv("YOUTUBEUPLOADER_AUTH_HEADLESS")
-}
-
-func getFlags(f *appFlags) {
-	flag.StringVar(&f.Video, "video", "", "set input video file")
-	flag.StringVar(&f.Video, "v", "", "set input video file")
-	flag.StringVar(&f.Thumbnail, "thumbnail", "", "set input thumbnail file")
-	flag.StringVar(&f.Thumbnail, "t", "", "set input thumbnail file")
-	flag.StringVar(&f.Caption, "caption", "", "set input caption file")
-	flag.StringVar(&f.Caption, "c", "", "set input caption file")
-	flag.StringVar(&f.Meta, "meta", "", "set input meta file")
-	flag.StringVar(&f.Meta, "m", "", "set input meta file")
-	flag.StringVar(&f.Log, "log", "", "enable log")
-	flag.StringVar(&f.Log, "l", "", "enable log")
-	flag.StringVar(&f.ClientID, "client_id", "", "set client id credentials path")
-	flag.StringVar(&f.ClientID, "ci", "", "set client id credentials path")
-	flag.StringVar(&f.ClientToken, "client_token", "", "set client token credentials path")
-	flag.StringVar(&f.ClientToken, "ct", "", "set client token credentials path")
-	flag.StringVar(&f.Title, "video_title", "", "set video title")
-	flag.StringVar(&f.Title, "vt", "", "set video title")
-	flag.StringVar(&f.Description, "video_description", "", "set video description")
-	flag.StringVar(&f.Description, "vd", "", "set video description")
-	flag.StringVar(&f.Tags, "video_tags", "", "set video tags/keywords")
-	flag.StringVar(&f.Tags, "vk", "", "set video tags/keywords")
-	flag.StringVar(&f.Language, "video_language", "en", "set video language")
-	flag.StringVar(&f.Language, "vl", "en", "set video language")
-	flag.StringVar(&f.Category, "video_category", "", "set video category id")
-	flag.StringVar(&f.Category, "vc", "", "set video category id")
-	flag.StringVar(&f.PrivacyStatus, "video_privacystatus", "public", "set video privacy status")
-	flag.StringVar(&f.PrivacyStatus, "vp", "public", "set video privacy status")
-	flag.StringVar(&f.Embeddable, "video_embeddable", "", "enable video to be embeddable")
-	flag.StringVar(&f.Embeddable, "ve", "", "enable video to be embeddable")
-	flag.StringVar(&f.License, "video_license", "standard", "set video license")
-	flag.StringVar(&f.License, "vl", "standard", "set video license")
-	flag.StringVar(&f.PublicStatsViewable, "video_publicstatsviewable", "", "enable public video stats to be viewable")
-	flag.StringVar(&f.PublicStatsViewable, "vs", "", "enable public video stats to be viewable")
-	flag.StringVar(&f.PublishAt, "video_publishat", "", "set video publish time")
-	flag.StringVar(&f.PublishAt, "vpa", "", "set video publish time")
-	flag.StringVar(&f.RecordingDate, "video_recordingdate", "", "set video recording date")
-	flag.StringVar(&f.RecordingDate, "vrd", "", "set video recording date")
-	flag.StringVar(&f.PlaylistIds, "video_playlistids", "", "set video playlist ids")
-	flag.StringVar(&f.PlaylistIds, "vpi", "", "set video playlist ids")
-	flag.StringVar(&f.PlaylistTitles, "video_playlisttitles", "", "set video playlist titles")
-	flag.StringVar(&f.PlaylistTitles, "vpt", "", "set video playlist titles")
-	flag.StringVar(&f.LocationLatitude, "video_location_latitude", "", "set video latitude coordinate")
-	flag.StringVar(&f.LocationLatitude, "vla", "", "set video latitude coordinate")
-	flag.StringVar(&f.LocationLongitude, "video_location_longitude", "", "set video longitude coordinate")
-	flag.StringVar(&f.LocationLongitude, "vlo", "", "set video longitude coordinate")
-	flag.StringVar(&f.LocationDescription, "video_locationdescription", "", "set video location description")
-	flag.StringVar(&f.LocationDescription, "vld", "", "set video location description")
-	flag.StringVar(&f.UploadChunk, "upload_chunk", "", "set upload chunk size in bytes")
-	flag.StringVar(&f.UploadChunk, "uc", "", "set upload chunk size in bytes")
-	flag.StringVar(&f.UploadRate, "upload_rate", "", "set upload rate limit in kbps")
-	flag.StringVar(&f.UploadRate, "ur", "", "set upload rate limit in kbps")
-	flag.StringVar(&f.UploadTime, "upload_time", "", "set upload time limit ex- \"10:00-14:00\"")
-	flag.StringVar(&f.UploadTime, "ut", "", "set upload time limit ex- \"10:00-14:00\"")
-	flag.StringVar(&f.AuthPort, "auth_port", "", "set OAuth request port")
-	flag.StringVar(&f.AuthPort, "ap", "", "set OAuth request port")
-	flag.StringVar(&f.AuthHeadless, "auth_headless", "", "enable browserless OAuth process")
-	flag.StringVar(&f.AuthHeadless, "ah", "", "enable browserless OAuth process")
-	flag.StringVar(&f.Version, "version", "", "show version")
-	flag.Parse()
 }
 
 func getUploadTime(f *appFlags) limitRange {
@@ -138,7 +46,7 @@ func getUploadTime(f *appFlags) limitRange {
 }
 
 func onVersion(f *appFlags) {
-	if parseBool(f.Version, false) {
+	if f.Version {
 		fmt.Printf("youtubeuploader v%s\n", appVersion)
 		os.Exit(0)
 	}
@@ -205,8 +113,8 @@ func updateMeta(m *youtube.Video, f *appFlags) {
 	if f.License != "" {
 		m.Status.License = parseLicense(f.License)
 	}
-	if f.PublicStatsViewable != "" {
-		m.Status.PublicStatsViewable = parseBool(f.PublicStatsViewable, false)
+	if f.PublicStatsViewable {
+		m.Status.PublicStatsViewable = f.PublicStatsViewable
 	}
 	if f.PublishAt != "" {
 		m.Status.PublishAt = f.PublishAt
@@ -334,8 +242,7 @@ func addToPlaylistTitles(srv *youtube.Service, pnams []string, sta string, id st
 
 // Main.
 func main() {
-	getEnv(&f)
-	getFlags(&f)
+	getFlags()
 	onVersion(&f)
 	onHelp(&f)
 	uploadTime := getUploadTime(&f)
@@ -350,7 +257,7 @@ func main() {
 	})
 
 	var quitChan chanChan
-	if parseBool(f.Log, false) {
+	if f.Log {
 		quitChan = make(chanChan)
 		go func() {
 			Progress(quitChan, transport, fileSize)

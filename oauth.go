@@ -172,7 +172,7 @@ func buildOAuthHTTPClient(ctx context.Context, scopes []string) (*http.Client, e
 		randState := fmt.Sprintf("st%d", time.Now().UnixNano())
 
 		callbackCh := make(chan CallbackStatus)
-		if !parseBool(f.AuthHeadless, false) {
+		if !f.AuthHeadless {
 			// Start web server.
 			// This is how this program receives the authorization code
 			// when the browser redirects.
@@ -186,7 +186,7 @@ func buildOAuthHTTPClient(ctx context.Context, scopes []string) (*http.Client, e
 
 		var cbs CallbackStatus
 
-		if parseBool(f.AuthHeadless, false) {
+		if f.AuthHeadless {
 			fmt.Printf("Visit the URL for the auth dialog: %v\n", url)
 
 			fmt.Printf("Enter authorisation code here: ")

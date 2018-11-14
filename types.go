@@ -9,37 +9,7 @@ import (
 //
 // Types
 //
-type appFlags struct {
-	Video               string
-	Thumbnail           string
-	Caption             string
-	Meta                string
-	Log                 string
-	ClientID            string
-	ClientToken         string
-	Title               string
-	Description         string
-	Tags                string
-	Language            string
-	Category            string
-	PrivacyStatus       string
-	Embeddable          string
-	License             string
-	PublicStatsViewable string
-	PublishAt           string
-	RecordingDate       string
-	PlaylistIds         string
-	PlaylistTitles      string
-	LocationLatitude    string
-	LocationLongitude   string
-	LocationDescription string
-	UploadChunk         string
-	UploadRate          string
-	UploadTime          string
-	AuthPort            string
-	AuthHeadless        string
-	Version             string
-}
+type chanChan chan chan struct{}
 
 //
 // Global variables
