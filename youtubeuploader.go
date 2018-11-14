@@ -41,8 +41,6 @@ func main() {
 	}
 
 	var id = f.Id
-	var ids []string
-	var act = false
 	uploadTime := getUploadTime()
 	videoFile, fileSize := openFile(f.Video)
 	thumbnailFile, _ := openFile(f.Thumbnail)
@@ -84,13 +82,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating YouTube client: %s", err)
 	}
-	// get id from title
+	// show video id
 	if f.Video == "" && f.Id == "" && f.Title != "" {
-		ids = searchVideoTitle(service, f.Title)
-		if len(ids) == 0 {
-			os.Exit(0)
+		for _, id := range searchVideoTitle(service, f.Title) {
+			fmt.Printf("%v\n", id)
 		}
-		id = ids[0]
+		os.Exit(0)
 	}
 	if f.PlaylistIds != "" && len(videoMeta.PlaylistIDs) == 0 {
 		videoMeta.PlaylistIDs = strings.Split(f.PlaylistIds, ";")
@@ -109,49 +106,36 @@ func main() {
 		video := uploadVideo(service, videoFile, upload, parseInt(f.UploadChunk, 0), quitChan)
 		logf("Upload successful! Video ID: %v\n", video.Id)
 		id = video.Id
-		act = true
 	} else if id != "" {
 		logf("Updating video %v...\n", id)
 		updateVideo(service, id, upload)
 		logf("Update successful!\n")
-		act = true
 	}
 	// upload thumbnail
 	if id != "" && thumbnailFile != nil {
 		logf("Uploading thumbnail %v '%s'...\n", id, f.Thumbnail)
 		uploadThumbnail(service, id, thumbnailFile)
 		logf("Thumbnail uploaded!\n")
-		act = true
 	}
 	// upload caption
 	if id != "" && captionFile != nil {
 		logf("Uploading caption %v:%v '%s'...\n", id, f.Language, f.Caption)
 		uploadCaption(service, id, captionFile)
 		logf("Caption uploaded!\n")
-		act = true
 	}
 	// add to playlist id
 	if id != "" && videoMeta.PlaylistID != "" {
 		logf("Adding to playlist id %v->[%v]...\n", id, 1)
 		addToPlaylistID(service, videoMeta.PlaylistID, upload.Status.PrivacyStatus, id)
-		act = true
 	}
 	// add to playlist ids
 	if id != "" && videoMeta.PlaylistIDs != nil {
 		logf("Adding to playlist ids %v->[%v]...\n", id, len(videoMeta.PlaylistIDs))
 		addToPlaylistIDs(service, videoMeta.PlaylistIDs, upload.Status.PrivacyStatus, id)
-		act = true
 	}
 	// add to playlist titles
 	if id != "" && videoMeta.PlaylistTitles != nil {
 		logf("Adding to playlist ids %v->[%v]...\n", id, len(videoMeta.PlaylistTitles))
 		addToPlaylistTitles(service, videoMeta.PlaylistTitles, upload.Status.PrivacyStatus, id)
-		act = true
-	}
-	// show ids
-	if !act {
-		for id := range ids {
-			fmt.Printf("%v\n", id)
-		}
 	}
 }
