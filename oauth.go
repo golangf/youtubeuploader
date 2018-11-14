@@ -27,9 +27,6 @@ found at:
 
 with information from the {{ Google Cloud Console }}
 {{ https://cloud.google.com/console }}
-
-For more information about the client_id.json file format, please visit:
-https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 `
 
 var (

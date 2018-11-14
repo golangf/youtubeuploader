@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Progress tracks upload progress
 func Progress(quitChan chanChan, transport *limitTransport, filesize int64) {
 	ticker := time.Tick(time.Second)
 	var erase int

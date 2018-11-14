@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 //
@@ -92,23 +94,7 @@ var fString = map[string]stringFlag{
 	"auth_port":           {"ap", "set OAuth request port (8080)", &f.AuthPort},
 }
 
-//
-// Functions
-//
-func getFlags() {
-	flag.BoolVar(&f.Help, "help", false, "show help")
-	flag.BoolVar(&f.Version, "version", false, "show version")
-	for k, bf := range fBool {
-		*bf.Value = parseBool(os.Getenv("YOUTUBEUPLOADER_"+strings.ToUpper(k)), false)
-		flag.BoolVar(bf.Value, bf.Short, false, bf.Usage)
-		flag.BoolVar(bf.Value, k, false, bf.Usage)
-	}
-	for k, sf := range fString {
-		*sf.Value = os.Getenv("YOUTUBEUPLOADER_" + strings.ToUpper(k))
-		flag.StringVar(sf.Value, sf.Short, "", sf.Usage)
-		flag.StringVar(sf.Value, k, "", sf.Usage)
-	}
-	flag.Parse()
+func getFlagDefaults() {
 	if f.ClientID == "" {
 		f.ClientID = "client_id.json"
 	}
@@ -133,6 +119,44 @@ func getFlags() {
 	if f.AuthPort == "" {
 		f.AuthPort = "8080"
 	}
+}
+
+func getFlagClient() {
+	var ai = strings.Split(f.ClientID, ";")
+	var at = strings.Split(f.ClientToken, ";")
+	var n = rand.Intn(65535)
+	f.ClientID = ai[n%len(ai)]
+	f.ClientToken = at[n%len(at)]
+}
+
+//
+// Functions
+//
+func getFlags() {
+	rand.Seed(time.Now().Unix())
+	flag.BoolVar(&f.Help, "help", false, "show help")
+	flag.BoolVar(&f.Version, "version", false, "show version")
+	for k, bf := range fBool {
+		flag.BoolVar(bf.Value, bf.Short, false, bf.Usage)
+		flag.BoolVar(bf.Value, k, false, bf.Usage)
+	}
+	for k, sf := range fString {
+		flag.StringVar(sf.Value, sf.Short, "", sf.Usage)
+		flag.StringVar(sf.Value, k, "", sf.Usage)
+	}
+	flag.Parse()
+	for k, bf := range fBool {
+		if *bf.Value == false {
+			*bf.Value = parseBool(os.Getenv("YOUTUBEUPLOADER_"+strings.ToUpper(k)), false)
+		}
+	}
+	for k, sf := range fString {
+		if *sf.Value == "" {
+			*sf.Value = os.Getenv("YOUTUBEUPLOADER_" + strings.ToUpper(k))
+		}
+	}
+	getFlagDefaults()
+	getFlagClient()
 }
 
 func getUploadTime() limitRange {

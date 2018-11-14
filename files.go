@@ -19,10 +19,12 @@ const ytDateLayout = "2006-01-02T15:04:05.000Z" // ISO 8601 (YYYY-MM-DDThh:mm:ss
 const inputDateLayout = "2006-01-02"
 const inputDatetimeLayout = "2006-01-02T15:04:05-07:00"
 
+// Date defines a date
 type Date struct {
 	time.Time
 }
 
+// LoadVideoMeta loads metaJSON
 func LoadVideoMeta(filename string, video *youtube.Video) (videoMeta VideoMeta) {
 	// attempt to load from meta JSON, otherwise use values specified from command line flags
 	if filename != "" {
@@ -107,6 +109,7 @@ errJump:
 	return
 }
 
+// Open opens a file
 func Open(filename string) (io.ReadCloser, int64, error) {
 	var reader io.ReadCloser
 	var filesize int64
@@ -148,6 +151,7 @@ func Open(filename string) (io.ReadCloser, int64, error) {
 	return file, fileInfo.Size(), nil
 }
 
+// UnmarshalJSON reads JSON
 func (d *Date) UnmarshalJSON(b []byte) (err error) {
 	s := string(b)
 	s = s[1 : len(s)-1]
@@ -169,7 +173,6 @@ func openFile(nam string) (io.ReadCloser, int64) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer fil.Close()
 	}
 	return fil, siz
 }

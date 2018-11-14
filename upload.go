@@ -59,11 +59,16 @@ func updateMeta(m *youtube.Video) {
 	if m.RecordingDetails.RecordingDate == "" {
 		m.RecordingDetails.RecordingDate = f.RecordingDate
 	}
-	if math.IsNaN(m.RecordingDetails.Location.Latitude) {
-		m.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, math.NaN())
-	}
-	if math.IsNaN(m.RecordingDetails.Location.Longitude) {
-		m.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, math.NaN())
+	if f.LocationLatitude != "" && f.LocationLongitude != "" {
+		if m.RecordingDetails.Location == nil {
+			m.RecordingDetails.Location = &youtube.GeoPoint{}
+		}
+		if math.IsNaN(m.RecordingDetails.Location.Latitude) {
+			m.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, math.NaN())
+		}
+		if math.IsNaN(m.RecordingDetails.Location.Longitude) {
+			m.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, math.NaN())
+		}
 	}
 	if m.RecordingDetails.LocationDescription == "" {
 		m.RecordingDetails.LocationDescription = f.LocationDescription

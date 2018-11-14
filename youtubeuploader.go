@@ -56,6 +56,15 @@ func main() {
 	videoFile, fileSize := openFile(f.Video)
 	thumbnailFile, _ := openFile(f.Thumbnail)
 	captionFile, _ := openFile(f.Caption)
+	if videoFile != nil {
+		defer videoFile.Close()
+	}
+	if thumbnailFile != nil {
+		defer thumbnailFile.Close()
+	}
+	if captionFile != nil {
+		defer captionFile.Close()
+	}
 
 	ctx := context.Background()
 	transport := &limitTransport{rt: http.DefaultTransport, lr: uploadTime, filesize: fileSize}
