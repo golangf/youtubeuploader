@@ -132,19 +132,19 @@ func main() {
 	}
 	// add to playlist id
 	if id != "" && videoMeta.PlaylistID != "" {
-		logf("Adding to playlist id %v->[%v]...", id, 1)
+		logf("Adding to playlist id %v->[%v]...\n", id, 1)
 		addToPlaylistID(service, videoMeta.PlaylistID, upload.Status.PrivacyStatus, id)
 		act = true
 	}
 	// add to playlist ids
 	if id != "" && videoMeta.PlaylistIDs != nil {
-		logf("Adding to playlist ids %v->[%v]...", id, len(videoMeta.PlaylistIDs))
+		logf("Adding to playlist ids %v->[%v]...\n", id, len(videoMeta.PlaylistIDs))
 		addToPlaylistIDs(service, videoMeta.PlaylistIDs, upload.Status.PrivacyStatus, id)
 		act = true
 	}
 	// add to playlist titles
 	if id != "" && videoMeta.PlaylistTitles != nil {
-		logf("Adding to playlist ids %v->[%v]...", id, len(videoMeta.PlaylistTitles))
+		logf("Adding to playlist ids %v->[%v]...\n", id, len(videoMeta.PlaylistTitles))
 		addToPlaylistTitles(service, videoMeta.PlaylistTitles, upload.Status.PrivacyStatus, id)
 		act = true
 	}
