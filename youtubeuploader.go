@@ -1,101 +1,25 @@
 package main
 
-import (
-	"context"
-	"flag"
-	"fmt"
-	"io"
-	"log"
-	"math"
-	"net/http"
-	"os"
-	"regexp"
-	"strconv"
-	"strings"
+import "google.golang.org/api/youtube/v3"
+import "google.golang.org/api/googleapi"
+import "golang.org/x/oauth2"
+import "net/http"
 
-	"golang.org/x/oauth2"
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/youtube/v3"
-)
+import "strings"
+import "context"
+import "regexp"
+import "flag"
+import "math"
+import "fmt"
+import "log"
+import "io"
+import "os"
 
 type chanChan chan chan struct{}
 
-// Flags for CLI.
-type Flags struct {
-	Video               string
-	Thumbnail           string
-	Caption             string
-	Meta                string
-	Log                 string
-	ClientID            string
-	ClientToken         string
-	Title               string
-	Description         string
-	Tags                string
-	Language            string
-	Category            string
-	PrivacyStatus       string
-	Embeddable          string
-	License             string
-	PublicStatsViewable string
-	PublishAt           string
-	RecordingDate       string
-	PlaylistIds         string
-	PlaylistTitles      string
-	LocationLatitude    string
-	LocationLongitude   string
-	LocationDescription string
-	UploadChunk         string
-	UploadRate          string
-	UploadTime          string
-	AuthPort            string
-	AuthHeadless        string
-	Version             string
-}
-
-// Set by compile-time to match git tag
+// Global variables
 var appVersion = ""
-var f = Flags{}
-
-func parseBool(txt string, def bool) bool {
-	ans, err := strconv.ParseBool(txt)
-	if err != nil {
-		return def
-	}
-	return ans
-}
-
-func parseInt(txt string, def int) int {
-	ans, err := strconv.ParseInt(txt, 10, 32)
-	if err != nil {
-		return def
-	}
-	return int(ans)
-}
-
-func parseFloat(txt string, def float64) float64 {
-	ans, err := strconv.ParseFloat(txt, 64)
-	if err != nil {
-		return def
-	}
-	return ans
-}
-
-func parsePrivacyStatus(txt string) string {
-	re := regexp.MustCompile("open|fee|public|common|creative")
-	if txt == "" || re.FindString(txt) == "" {
-		return "public"
-	}
-	return "private"
-}
-
-func parseLicense(txt string) string {
-	re := regexp.MustCompile("open|free|common|creative")
-	if txt == "" || re.FindString(txt) == "" {
-		return ""
-	}
-	return "creativeCommon"
-}
+var f = appFlags{}
 
 func openFile(nam string) (io.ReadCloser, int64) {
 	var fil io.ReadCloser
@@ -112,7 +36,7 @@ func openFile(nam string) (io.ReadCloser, int64) {
 	return fil, siz
 }
 
-func getEnv(f *Flags) {
+func getEnv(f *appFlags) {
 	f.Log = os.Getenv("YOUTUBEUPLOADER_LOG")
 	f.ClientID = os.Getenv("YOUTUBEUPLOADER_CLIENT_ID")
 	f.ClientToken = os.Getenv("YOUTUBEUPLOADER_CLIENT_TOKEN")
@@ -139,7 +63,7 @@ func getEnv(f *Flags) {
 	f.AuthHeadless = os.Getenv("YOUTUBEUPLOADER_AUTH_HEADLESS")
 }
 
-func getFlags(f *Flags) {
+func getFlags(f *appFlags) {
 	flag.StringVar(&f.Video, "video", "", "set input video file")
 	flag.StringVar(&f.Video, "v", "", "set input video file")
 	flag.StringVar(&f.Thumbnail, "thumbnail", "", "set input thumbnail file")
@@ -200,7 +124,7 @@ func getFlags(f *Flags) {
 	flag.Parse()
 }
 
-func getUploadTime(f *Flags) limitRange {
+func getUploadTime(f *appFlags) limitRange {
 	var ans limitRange
 	var err error
 	if f.UploadTime != "" {
@@ -213,14 +137,14 @@ func getUploadTime(f *Flags) limitRange {
 	return ans
 }
 
-func onVersion(f *Flags) {
+func onVersion(f *appFlags) {
 	if parseBool(f.Version, false) {
 		fmt.Printf("youtubeuploader v%s\n", appVersion)
 		os.Exit(0)
 	}
 }
 
-func onHelp(f *Flags) {
+func onHelp(f *appFlags) {
 	if f.Video == "" && f.Title == "" {
 		fmt.Printf("No video file to upload!\n")
 		flag.PrintDefaults()
@@ -247,7 +171,7 @@ func onTitle(srv *youtube.Service, txt string) {
 	}
 }
 
-func updateFlags(f *Flags) {
+func updateFlags(f *appFlags) {
 	if f.Title == "" {
 		f.Title = f.Video
 	}
@@ -256,7 +180,7 @@ func updateFlags(f *Flags) {
 	}
 }
 
-func updateMeta(m *youtube.Video, f *Flags) {
+func updateMeta(m *youtube.Video, f *appFlags) {
 	if m.Snippet.Title == "" {
 		m.Snippet.Title = f.Title
 	}
