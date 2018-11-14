@@ -17,21 +17,6 @@ import (
 // Global variables
 var appVersion = ""
 
-func onVersion(f *appFlags) {
-	if f.Version {
-		fmt.Printf("youtubeuploader v%s\n", appVersion)
-		os.Exit(0)
-	}
-}
-
-func onHelp(f *appFlags) {
-	if f.Video == "" && f.Title == "" {
-		fmt.Printf("No video file to upload!\n")
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
-}
-
 func onTitle(srv *youtube.Service, txt string) {
 	res, err := srv.Search.List("snippet").Type("video").Q(txt).Do()
 	if err != nil {
@@ -54,8 +39,19 @@ func onTitle(srv *youtube.Service, txt string) {
 // Main.
 func main() {
 	getFlags()
-	onVersion(&f)
-	onHelp(&f)
+	if f.Help {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+	if f.Version {
+		fmt.Printf("youtubeuploader v%s\n", appVersion)
+		os.Exit(0)
+	}
+	if f.Video == "" && f.Title == "" {
+		fmt.Printf("No video file to upload!\n")
+		os.Exit(1)
+	}
+
 	uploadTime := getUploadTime()
 	videoFile, fileSize := openFile(f.Video)
 	thumbnailFile, _ := openFile(f.Thumbnail)
