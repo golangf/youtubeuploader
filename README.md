@@ -92,8 +92,8 @@ youtubeuploader [options]
 # -od, --description:   set description (video)
 # -ok, --tags:          set tags/keywords
 # -ol, --language:      set language (en)
-# -oc, --category:      set category (people and blobd)
-# -op, --privacystatus: set privacy status (public)
+# -oc, --category:      set category (people and blogs)
+# -op, --privacystatus: set privacy status (private)
 # -oe, --embeddable:    enable to be embeddable
 # -ol, --license:       set license (standard)
 # -os, --publicstatsviewable: enable public stats to be viewable
@@ -104,7 +104,7 @@ youtubeuploader [options]
 # -ola, --location_latitude:   set latitude coordinate
 # -olo, --location_longitude:  set longitude coordinate
 # -old, --locationdescription: set location description
-# -uc, --upload_chunk:  set upload chunk size in bytes (8388608)
+# -uc, --upload_chunk:  set upload chunk size in bytes
 # -ur, --upload_rate:   set upload rate limit in kbps (no limit)
 # -ut, --upload_time:   set upload time limit ex- "10:00-14:00"
 # -ap, --auth_port:     set OAuth request port (8080)
@@ -124,7 +124,7 @@ $YOUTUBEUPLOADER_DESCRIPTION   # set description (file)
 $YOUTUBEUPLOADER_TAGS          # set tags/keywords
 $YOUTUBEUPLOADER_LANGUAGE      # set language (en)
 $YOUTUBEUPLOADER_CATEGORY      # set category id (22)
-$YOUTUBEUPLOADER_PRIVACYSTATUS # set privacy (public)
+$YOUTUBEUPLOADER_PRIVACYSTATUS # set privacy (private)
 $YOUTUBEUPLOADER_EMBEDDABLE    # enable to be embeddable (0)
 $YOUTUBEUPLOADER_LICENSE       # set license (standard)
 $YOUTUBEUPLOADER_PUBLICSTATSVIEWABLE # enable public stats to be viewable (0)
@@ -135,7 +135,7 @@ $YOUTUBEUPLOADER_PLAYLISTTITLES # set playlist titles
 $YOUTUBEUPLOADER_LOCATION_LATITUDE   # set latitude coordinate
 $YOUTUBEUPLOADER_LOCATION_LONGITUDE  # set longitude coordinate
 $YOUTUBEUPLOADER_LOCATIONDESCRIPTION # set location description
-$YOUTUBEUPLOADER_UPLOAD_CHUNK  # set upload chunk size in bytes (8388608)
+$YOUTUBEUPLOADER_UPLOAD_CHUNK  # set upload chunk size in bytes
 $YOUTUBEUPLOADER_UPLOAD_RATE   # set upload rate limit in kbps (no limit)
 $YOUTUBEUPLOADER_UPLOAD_TIME   # set upload time limit ex- "10:00-14:00"
 $YOUTUBEUPLOADER_AUTH_PORT     # set OAuth request port (8080)
