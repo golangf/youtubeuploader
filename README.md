@@ -60,8 +60,8 @@ youtubeuploader -v video.mp4
 youtubeuploader -v video.mkv -ot "Me at the zoo" -od "The first video on YouTube..."
 # video.mkv uploaded with title and description
 
-youtubeuploader -v video.mp4 -op public
-# video.mp4 uploaded as public video
+youtubeuploader -v video.mp4 -op public -l
+# video.mp4 uploaded as public video (log enabled)
 
 youtubeuploader -ot "Me at the zoo"
 # get video id from title
