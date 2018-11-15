@@ -176,6 +176,8 @@ Do you need anything similar?
 - [extra-youtubeuploader] is this package for [Node.js].
 - [extra-stillvideo] can generate video from audio and image.
 - [extra-googletts] can generate spoken audio from text.
+
+Suggestions are welcome. Please [create an issue]. 
 <br><br>
 
 
@@ -191,6 +193,7 @@ Do you need anything similar?
 [extra-youtubeuploader]: https://www.npmjs.com/package/extra-youtubeuploader
 [extra-stillvideo]: https://www.npmjs.com/package/extra-stillvideo
 [extra-googletts]: https://www.npmjs.com/package/extra-googletts
+[create an issue]: https://github.com/golangf/youtubeuploader/issues
 [Node.js]: https://nodejs.org/en/download/
 
 [releases]: https://github.com/golangf/youtubeuploader/releases
