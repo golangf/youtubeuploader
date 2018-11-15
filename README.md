@@ -1,119 +1,147 @@
-# Youtube Uploader
+Upload YouTube videos with caption through machines.
+> Do you want to:
+> - Upload your AI generated video to YouTube?
+> - Or, [Upload Wikipedia TTS videos on YouTube]?
 
-Scripted uploads to youtube.
+Sample: ["Pixelsphere OST (2017)"]. 
+<br>
 
-- upload video files from local disk or from the web.
-- ratelimit upload bandwidth
 
-## Download
+## setup
 
-Grab a [precompiled binary](https://github.com/porjo/youtubeuploader/releases)^ for Linux, Mac or Windows or build it yourself.
+### install
 
-_^ The binaries are compressed so you need to unpack them and give them executable permissions (e.g. chmod +x)_
+1. Download for your OS from [releases].
+2. Extract it to a directoryn and add the directory to `PATH`.
+<br>
 
-## Build
 
-http://gnuwin32.sourceforge.net/packages/zip.htm
-This project uses ['dep'](https://github.com/golang/dep) for [vendoring](https://blog.gopheracademy.com/advent-2015/vendor-folder/).
+### get client id
 
-- Install Go e.g. `yum install golang` or `apt-get install golang`
-- Define your Go Path e.g. `export GOPATH=$HOME/go`
-- Fetch the project `go get github.com/porjo/youtubeuploader`
-- run `dep ensure` in the project root
-- run `go build`
+1. Create an [account] on [Google Cloud Platform].
+2. Create a [new project], and select it.
+3. Enable [YouTube Data API] for the project.
+4. Add [credentials] to your project.
+5. Which API are you using? `YouTube Data API v3`.
+6. Where will you be calling the API from? `Web server`.
+7. What data will you be accessing? `User data`.
+8. Select `What credentials do I need?`.
+9. Create an OAuth 2.0 client ID.
+10. Name: `youtubeuploader` (your choice).
+11. Authorized JavaScript origins: `http://localhost:8080`.
+12. Authorized redirect URIs: `http://localhost:8080/oauth2callback`.
+13. Select `Create OAuth client ID`.
+14. Set up the OAuth 2.0 consent screen.
+15. Email address: (it should be correct).
+16. Product name shown to users: `youtubeuploader` (your choice).
+17. Select `Continue`.
+18. Download credentials.
+19. Select `Download`, then `Done`.
+21. Copy downloaded file (`client_id.json`) to a directory.
 
-## Setup
 
-### Youtube API
+### get client token
 
-Talking to the Youtube API requires oauth2 authentication. As such, you must:
+1. Open [console] in the above directory.
+2. Run `youtubeuploader -v client_id.json`.
+3. OAuth page will be opened in browser.
+3. Choose an account, videos will be uploaded here.
+4. `youtubeuploader` wants to access your Google Account.
+5. Select `Allow`, and close browser window.
+6. `client_token.json` should be created.
+<br>
 
-1. Create an account on the [Google Developers Console](https://console.developers.google.com)
-1. Register a new app there
-1. Enable the Youtube API (APIs & Auth -> APIs)
-1. Create Client ID (APIs & Auth -> Credentials), select 'Web application'
-1. Add an 'Authorized redirect URI' of 'http://localhost:8080/oauth2callback'
-1. Take note of the `Client ID` and `Client secret` values
 
-The utility looks for `client_secrets.json` in the local directory. Create it first using the details from above:
+## usage
 
+```bash
+youtubeuploader -v video.mp4
+# video.mp4 uploaded (yay!)
+
+youtubeuploader -v video.mkv -yt "Me at the zoo" -yd "The first video on YouTube..."
+# video.mkv uploaded with title and description
+
+youtubeuploader -v video.mp4 -yp public
+# video.mp4 uploaded as public video
 ```
+
+### reference
+
+```bash
+youtubeuploader [options]
+# --help:    show help
+# --version: show version
+# -l, --log:       enable log
+# -v, --video:     set input video file/URL
+# -t, --thumbnail: set input thumbnail file/URL
+# -c, --caption:   set input caption file/URL
+# -m, --meta:      set input meta file
+# -d, --descriptionpath: set input description file
+# -ci, --client_id:      set client id credentials path (client_id.json)
+# -ct, --client_token:   set client token credentials path (client_token.json)
+# -ot, --title:         set title (video)
+# -od, --description:   set description (video)
+# -ok, --tags:          set tags/keywords
+# -ol, --language:      set language (en)
+# -oc, --category:      set category (people and blobd)
+# -op, --privacystatus: set privacy status (public)
+# -oe, --embeddable:    enable to be embeddable
+# -ol, --license:       set license (standard)
+# -os, --publicstatsviewable: enable public stats to be viewable
+# -opa, --publishat:          set publish time
+# -ord, --recordingdate:  set recording date
+# -opi, --playlistids:    set playlist ids
+# -opt, --playlisttitles: set playlist titles
+# -ola, --location_latitude:   set latitude coordinate
+# -olo, --location_longitude:  set longitude coordinate
+# -old, --locationdescription: set location description
+# -uc, --upload_chunk:  set upload chunk size in bytes (8388608)
+# -ur, --upload_rate:   set upload rate limit in kbps (no limit)
+# -ut, --upload_time:   set upload time limit ex- "10:00-14:00"
+# -ap, --auth_port:     set OAuth request port (8080)
+# -ah, --auth_headless: enable browserless OAuth process
+
+# Environment variables:
+$YOUTUBEUPLOADER_LOG # enable log (0)
+$YOUTUBEUPLOADER_VIDEO     # set input video file
+$YOUTUBEUPLOADER_THUMBNAIL # set input thumbnail file
+$YOUTUBEUPLOADER_CAPTION   # set input caption file
+$YOUTUBEUPLOADER_META      # set input meta file
+$YOUTUBEUPLOADER_DESCRIPTIONPATH # set input description file
+$YOUTUBEUPLOADER_CLIENT_ID       # set client id credentials path (client_id.json)
+$YOUTUBEUPLOADER_CLIENT_TOKEN    # set client token credentials path (client_token.json)
+$YOUTUBEUPLOADER_TITLE         # set title (file)
+$YOUTUBEUPLOADER_DESCRIPTION   # set description (file)
+$YOUTUBEUPLOADER_TAGS          # set tags/keywords
+$YOUTUBEUPLOADER_LANGUAGE      # set language (en)
+$YOUTUBEUPLOADER_CATEGORY      # set category id (22)
+$YOUTUBEUPLOADER_PRIVACYSTATUS # set privacy (public)
+$YOUTUBEUPLOADER_EMBEDDABLE    # enable to be embeddable (0)
+$YOUTUBEUPLOADER_LICENSE       # set license (standard)
+$YOUTUBEUPLOADER_PUBLICSTATSVIEWABLE # enable public stats to be viewable (0)
+$YOUTUBEUPLOADER_PUBLISHAT           # set publish time
+$YOUTUBEUPLOADER_RECORDINGDATE  # set recording date
+$YOUTUBEUPLOADER_PLAYLISTIDS    # set playlist ids
+$YOUTUBEUPLOADER_PLAYLISTTITLES # set playlist titles
+$YOUTUBEUPLOADER_LOCATION_LATITUDE   # set latitude coordinate
+$YOUTUBEUPLOADER_LOCATION_LONGITUDE  # set longitude coordinate
+$YOUTUBEUPLOADER_LOCATIONDESCRIPTION # set location description
+$YOUTUBEUPLOADER_UPLOAD_CHUNK  # set upload chunk size in bytes (8388608)
+$YOUTUBEUPLOADER_UPLOAD_RATE   # set upload rate limit in kbps (no limit)
+$YOUTUBEUPLOADER_UPLOAD_TIME   # set upload time limit ex- "10:00-14:00"
+$YOUTUBEUPLOADER_AUTH_PORT     # set OAuth request port (8080)
+$YOUTUBEUPLOADER_AUTH_HEADLESS # enable browserless OAuth process (0)
+```
+
+```javascript
+// META file (.json)
+// - specified using -m/--meta
+// - all fields are optional
 {
-  "installed": {
-    "client_id": "xxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com",
-    "client_secret": "xxxxxxxxxxxxxxxxxxxxx",
-    "redirect_uris": ["http://localhost:8080/oauth2callback"],
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://accounts.google.com/o/oauth2/token"
-  }
-}
-```
-
-Update `client_id` and `client_secret` to match your details
-
-## Usage
-
-At a minimum, just specify a filename:
-
-```
-./youtubeuploader -filename blob.mp4
-```
-
-If it is the first time you've run the utility, a browser window should popup and prompt you to provide Youtube credentials. A token will be created and stored in `request.token` file in the local directory for subsequent use. To run the utility on a headless-server, generate the token file locally first, then simply copy the token file along with `youtubeuploader` and `client_secrets.json` to the remote host.
-
-Full list of options:
-```
-  -cache string
-    	Token cache file (default "request.token")
-  -caption string
-      Caption to upload. Can be a URL
-  -categoryId string
-    	Video category Id
-  -chunksize int
-    	size (in bytes) of each upload chunk. A zero value will cause all data to be uploaded in a single request (default 8388608)
-  -description string
-    	Video description (default "uploaded by youtubeuploader")
-  -filename string
-    	Filename to upload. Can be a URL
-  -headlessAuth
-    	set this if no browser available for the oauth authorisation step
-  -language string
-      Video language (default "en")
-  -limitBetween string
-    	Only rate limit between these times e.g. 10:00-14:00 (local time zone)
-  -metaJSON string
-    	JSON file containing title,description,tags etc (optional)
-  -oAuthPort int
-    	TCP port to listen on when requesting an oAuth token (default 8080)
-  -privacy string
-    	Video privacy status (default "private")
-  -quiet
-    	Suppress progress indicator
-  -ratelimit int
-    	Rate limit upload in kbps. No limit by default
-  -secrets string
-    	Client Secrets configuration (default "client_secrets.json")
-  -tags string
-    	Comma separated list of video tags
-  -thumbnail string
-    	Thumbnail to upload. Can be a URL
-  -title string
-    	Video title (default "Video Title")
-  -v	show version
-```
-*NOTE:* When specifying a URL as the filename, the data will be streamed through the localhost (download from remote host, then upload to Youtube)
-
-
-### Metadata
-
-Video title, description etc can specified via the command line flags or via a JSON file using the `-metaJSON` flag. An example JSON file would be:
-
-```json
-{
-  "title": "my test title",
-  "description": "my test description",
-  "tags": ["test tag1", "test tag2"],
-  "privacyStatus": "private",
+  "title": "How Risky Is The Stock Market?",
+  "description": "Have you ever thought about investing ...",
+  "tags": ["stock marketing", "risk management"],
+  "privacyStatus": "public",
   "embeddable": true,
   "license": "creativeCommon",
   "publicStatsViewable": true,
@@ -124,33 +152,46 @@ Video title, description etc can specified via the command line flags or via a J
     "latitude": 48.8584,
     "longitude": 2.2945
   },
-  "locationDescription":  "Eiffel Tower",
+  "locationDescription":  "Bombay Stock Exchange",
   "playlistIds":  ["xxxxxxxxxxxxxxxxxx", "yyyyyyyyyyyyyyyyyy"],
   "playlistTitles":  ["my test playlist"],
-  "language":  "fr"
+  "language":  "en"
 }
 ```
-- all fields are optional. Command line flags will be used by default (where available)
-- use `\n` in the description to insert newlines
-- times can be provided in one of two formats: `yyyy-mm-dd` (UTC) or `yyyy-mm-ddThh:mm:ss+zz:zz`
+<br>
 
-## Alternative Oauth setup for headless clients
 
-If you do not have access to a web browser on the host where `youtubeuploader` is installed, you may follow this oauth setup method instead:
+## similar
 
-1. Create an account on the [Google Developers Console](https://console.developers.google.com)
-1. Register a new app there
-1. Enable the Youtube API (APIs & Auth -> APIs)
-1. Create Client ID (APIs & Auth -> Credentials), select Application Type 'Other'
-1. Download the resulting credentials file, saving it as `client_secrets.json` in the `youtubeuploader` directory
-1. Run `youtubeuploader` for the first time, passing the `-headlessAuth` parameter
-1. Copy-and-paste the URL displayed and open that in a browser
-1. Copy the resulting authorisation code and paste that into the `youtubeuploader` prompt: *"Enter authorisation code here:"*
+Do you need anything similar?
+- [extra-youtubeuploader] is this package for [Node.js].
+- [extra-stillvideo] can generate video from audio and image.
+- [extra-googletts] can generate spoken audio from text.
 
-(subsequent invocations of `youtubeuploader` do not require the `-headlessAuth` parameter)
 
-## Credit
+[![nodef](https://i.imgur.com/HS08T0y.jpg)](https://nodef.github.io)
+> This fork adds additional features: title search, video content update.<br>
+> Most of the [original code] is developed by [porjo]. Please thank him.<br>
+> Thanks to [youtube-upload] for insight into how to update playlists.<br>
+> Based on [Go Youtube API Sample code].
 
-Based on [Go Youtube API Sample code](https://github.com/youtube/api-samples/tree/master/go)
+[Upload Wikipedia TTS videos on YouTube]: https://www.youtube.com/results?search_query=wikipedia+audio+article
+["Pixelsphere OST (2017)"]: https://www.youtube.com/watch?v=RCryNyHbSDc&list=PLNEveYilIj1AV5-ETDCHufWazEHRcP8o-
 
-Thanks to [github.com/tokland/youtube-upload](https://github.com/tokland/youtube-upload) for insight into how to update playlists.
+[extra-youtubeuploader]: https://www.npmjs.com/package/extra-youtubeuploader
+[extra-stillvideo]: https://www.npmjs.com/package/extra-stillvideo
+[extra-googletts]: https://www.npmjs.com/package/extra-googletts
+[Node.js]: https://nodejs.org/en/download/
+
+[releases]: https://github.com/golangf/youtubeuploader/releases
+[console]: https://en.wikipedia.org/wiki/Shell_(computing)#Text_(CLI)_shells
+[account]: https://accounts.google.com/signup
+[Google Cloud Platform]: https://console.developers.google.com/
+[new project]: https://console.cloud.google.com/projectcreate
+[YouTube Data API]: https://console.cloud.google.com/apis/library/youtube.googleapis.com
+[credentials]: https://console.cloud.google.com/apis/credentials/wizard
+
+[original code]: https://github.com/porjo/youtubeuploader
+[porjo]: https://github.com/porjo
+[Go Youtube API Sample code]: https://github.com/youtube/api-samples/tree/master/go
+[youtube-upload]: https://github.com/tokland/youtube-upload
