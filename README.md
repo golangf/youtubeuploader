@@ -12,8 +12,7 @@ Sample: ["Pixelsphere OST (2017)"].
 ### install
 
 1. Download for your OS from [releases].
-2. Extract it to a directoryn and add the directory to `PATH`.
-<br>
+2. Extract it to a directory and add the directory to `PATH`.
 
 
 ### get client id
@@ -58,11 +57,20 @@ Sample: ["Pixelsphere OST (2017)"].
 youtubeuploader -v video.mp4
 # video.mp4 uploaded (yay!)
 
-youtubeuploader -v video.mkv -yt "Me at the zoo" -yd "The first video on YouTube..."
+youtubeuploader -v video.mkv -ot "Me at the zoo" -od "The first video on YouTube..."
 # video.mkv uploaded with title and description
 
-youtubeuploader -v video.mp4 -yp public
+youtubeuploader -v video.mp4 -op public
 # video.mp4 uploaded as public video
+
+youtubeuploader -ot "Me at the zoo"
+# get video id from title
+
+youtubeuploader -i "jNQXAC9IVRw" -ot "Elephants at zoo"
+# update video title "Me at the zoo" -> "Elephants at zoo"
+
+youtubeuploader -i "jNQXAC9IVRw" -c "odia.txt" -ol "or"
+# upload odia captions for the video
 ```
 
 ### reference
@@ -72,6 +80,7 @@ youtubeuploader [options]
 # --help:    show help
 # --version: show version
 # -l, --log:       enable log
+# -i, --id:        set video id (for update)
 # -v, --video:     set input video file/URL
 # -t, --thumbnail: set input thumbnail file/URL
 # -c, --caption:   set input caption file/URL
@@ -167,6 +176,7 @@ Do you need anything similar?
 - [extra-youtubeuploader] is this package for [Node.js].
 - [extra-stillvideo] can generate video from audio and image.
 - [extra-googletts] can generate spoken audio from text.
+<br><br>
 
 
 [![nodef](https://i.imgur.com/HS08T0y.jpg)](https://nodef.github.io)
