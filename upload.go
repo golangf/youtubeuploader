@@ -172,13 +172,13 @@ func uploadThumbnail(srv *youtube.Service, id string, fil io.ReadCloser) {
 	}
 }
 
-func uploadCaption(srv *youtube.Service, id string, fil io.ReadCloser) {
+func uploadCaption(srv *youtube.Service, id string, lng string, fil io.ReadCloser) {
 	c := &youtube.Caption{
 		Snippet: &youtube.CaptionSnippet{},
 	}
 	c.Snippet.VideoId = id
-	c.Snippet.Language = f.Language
-	c.Snippet.Name = f.Language
+	c.Snippet.Language = lng
+	c.Snippet.Name = lng
 	req := srv.Captions.Insert("snippet", c).Sync(true)
 	res, err := req.Media(fil).Do()
 	if err != nil {

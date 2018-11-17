@@ -119,8 +119,8 @@ func main() {
 	}
 	// upload caption
 	if id != "" && captionFile != nil {
-		logf("Uploading caption %v:%v '%s'...\n", id, f.Language, f.Caption)
-		uploadCaption(service, id, captionFile)
+		logf("Uploading caption %v:%v '%s'...\n", id, upload.Snippet.DefaultLanguage, f.Caption)
+		uploadCaption(service, id, upload.Snippet.DefaultLanguage, captionFile)
 		logf("Caption uploaded!\n")
 	}
 	// add to playlist id
