@@ -51,6 +51,9 @@ type VideoMeta struct {
 
 	// BCP-47 language code e.g. 'en','es'
 	Language string `json:"language,omitempty"`
+
+	// JSON map
+	JSON map[string]interface{}
 }
 
 //

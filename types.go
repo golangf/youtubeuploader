@@ -128,3 +128,14 @@ func shortString(txt string, max int) string {
 	}
 	return txt[0:max-3] + "..."
 }
+
+func mapGet(obj map[string]interface{}, pth string) interface{} {
+	var dot = strings.Index(pth, ".")
+	if dot < 0 {
+		return obj[pth]
+	}
+	if val, ok := obj[pth[0:dot]].(map[string]interface{}); ok {
+		return mapGet(val, pth[dot+1:])
+	}
+	return nil
+}

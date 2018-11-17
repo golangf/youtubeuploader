@@ -42,6 +42,13 @@ func LoadVideoMeta(filename string, y *youtube.Video) (m VideoMeta) {
 			goto errJump
 		}
 
+		e = json.Unmarshal(file, &m.JSON)
+		if e != nil {
+			fmt.Printf("Error parsing file '%s': %s\n", filename, e)
+			fmt.Println("Will use command line flags instead")
+			goto errJump
+		}
+
 		y.Status = &youtube.VideoStatus{}
 		y.Snippet.Tags = m.Tags
 		y.Snippet.Title = m.Title
