@@ -100,6 +100,8 @@ func main() {
 		getUploadFlags(upload, &videoMeta)
 		logUploadFlags(upload)
 	}
+	// DELETE ME!!!!!
+	os.Exit(0)
 	// upload video
 	if videoFile != nil {
 		logf("Uploading file '%s'...\n", f.Video)

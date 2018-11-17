@@ -137,6 +137,17 @@ func shortString(txt string, max int) string {
 	return txt[0:max-3] + "..."
 }
 
+func arrayJoin(arr []interface{}, sep string) string {
+	var sb strings.Builder
+	for _, val := range arr {
+		sb.WriteString(fmt.Sprintf("%v%v", val, sep))
+	}
+	if sb.Len() == 0 {
+		return ""
+	}
+	return sb.String()[0 : sb.Len()-len(sep)]
+}
+
 func mapGet(obj map[string]interface{}, pth string) interface{} {
 	var dot = strings.Index(pth, ".")
 	if dot < 0 {
@@ -151,8 +162,8 @@ func mapGet(obj map[string]interface{}, pth string) interface{} {
 func mapString(txt string, obj map[string]interface{}) string {
 	return reTemplate.ReplaceAllStringFunc(txt, func(m string) string {
 		var val = mapGet(obj, m[2:len(m)-1])
-		if arr, ok := val.([]string); ok {
-			return strings.Join(arr, ",")
+		if arr, ok := val.([]interface{}); ok {
+			return arrayJoin(arr, ",")
 		}
 		return fmt.Sprintf("%v", val)
 	})
