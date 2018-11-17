@@ -2,9 +2,7 @@ package main
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
-	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,66 +12,60 @@ import (
 )
 
 //
+// Global variables
+//
+var reTemplate = regexp.MustCompile("\\$\\{.*?\\}")
+
+//
 // Functions
 //
-func updateUpload(y *youtube.Video) {
-	if y.Snippet.Title == "" {
-		y.Snippet.Title = f.Title
+func getUploadFlagsDefault(y *youtube.Video) {
+	y.Snippet.Title = parseString(y.Snippet.Title, f.Video)
+	y.Snippet.Description = parseString(y.Snippet.Description, f.Video)
+	y.Snippet.DefaultLanguage = parseString(y.Snippet.DefaultLanguage, "en")
+	y.Snippet.DefaultAudioLanguage = parseString(y.Snippet.DefaultAudioLanguage, "en")
+	y.Snippet.CategoryId = parseString(y.Snippet.CategoryId, "22")
+	y.Status.PrivacyStatus = parseString(y.Status.PrivacyStatus, "private")
+}
+
+func getUploadFlagsDynamic(y *youtube.Video, m *VideoMeta) {
+	if y.Snippet.Tags == nil {
+		y.Snippet.Tags = []string{}
 	}
-	if y.Snippet.Title == "" {
-		y.Snippet.Title = f.Video
+	if f.Title != "" {
+		y.Snippet.Title = mapString(f.Title, m.JSON)
 	}
-	if y.Snippet.Description == "" && f.DescriptionPath != "" {
-		dat, err := ioutil.ReadFile(f.DescriptionPath)
-		if err != nil {
-			log.Fatalf("Error reading description file '%v': %v", f.DescriptionPath, err)
-		}
-		y.Snippet.Description = string(dat)
+	if f.Description != "" {
+		y.Snippet.Description = mapString(f.Description, m.JSON)
 	}
-	if y.Snippet.Description == "" {
-		y.Snippet.Description = f.Description
+	if f.Tags != "" {
+		y.Snippet.Tags = strings.Split(mapString(f.Tags, m.JSON), ",")
 	}
-	if y.Snippet.Tags == nil && strings.Trim(f.Tags, "") != "" {
-		y.Snippet.Tags = strings.Split(f.Tags, ",")
-	}
-	if y.Snippet.DefaultLanguage == "" {
-		y.Snippet.DefaultLanguage = f.Language
-	}
-	if y.Snippet.DefaultAudioLanguage == "" {
-		y.Snippet.DefaultAudioLanguage = f.Language
-	}
-	if y.Snippet.CategoryId == "" {
+	if f.Category != "" {
 		y.Snippet.CategoryId = strconv.Itoa(parseCategory(f.Category))
 	}
-	if y.Status.PrivacyStatus == "" {
-		y.Status.PrivacyStatus = f.PrivacyStatus
-	}
-	if y.Status.License == "" {
+	if f.License != "" {
 		y.Status.License = parseLicense(f.License)
 	}
-	if !y.Status.PublicStatsViewable {
+	if f.PublicStatsViewable {
 		y.Status.PublicStatsViewable = f.PublicStatsViewable
 	}
-	if y.Status.PublishAt == "" {
-		y.Status.PublishAt = f.PublishAt
-	}
-	if y.RecordingDetails.RecordingDate == "" {
-		y.RecordingDetails.RecordingDate = f.RecordingDate
-	}
-	if f.LocationLatitude != "" && f.LocationLongitude != "" {
+	if f.LocationLatitude != "" || f.LocationLongitude != "" {
 		if y.RecordingDetails.Location == nil {
 			y.RecordingDetails.Location = &youtube.GeoPoint{}
 		}
-		if math.IsNaN(y.RecordingDetails.Location.Latitude) {
-			y.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, math.NaN())
-		}
-		if math.IsNaN(y.RecordingDetails.Location.Longitude) {
-			y.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, math.NaN())
-		}
+		y.RecordingDetails.Location.Latitude = parseFloat(f.LocationLatitude, y.RecordingDetails.Location.Latitude)
+		y.RecordingDetails.Location.Longitude = parseFloat(f.LocationLongitude, y.RecordingDetails.Location.Longitude)
 	}
-	if y.RecordingDetails.LocationDescription == "" {
-		y.RecordingDetails.LocationDescription = f.LocationDescription
-	}
+	y.Status.PrivacyStatus = parseString(f.PrivacyStatus, y.Status.PrivacyStatus)
+	y.Status.PublishAt = parseString(f.PublishAt, y.Status.PublishAt)
+	y.RecordingDetails.RecordingDate = parseString(f.RecordingDate, y.RecordingDetails.RecordingDate)
+	y.RecordingDetails.LocationDescription = parseString(f.LocationDescription, y.RecordingDetails.LocationDescription)
+}
+
+func getUploadFlags(y *youtube.Video, m *VideoMeta) {
+	getUploadFlagsDynamic(y, m)
+	getUploadFlagsDefault(y)
 }
 
 func searchVideoTitle(srv *youtube.Service, txt string) []string {

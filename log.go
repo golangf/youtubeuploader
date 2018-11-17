@@ -71,7 +71,7 @@ func videoRecordingDetails(o *youtube.VideoRecordingDetails) string {
 	return ans
 }
 
-func logUpload(y *youtube.Video) {
+func logUploadFlags(y *youtube.Video) {
 	if !f.Log {
 		return
 	}

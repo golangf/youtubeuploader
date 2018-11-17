@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -145,4 +146,14 @@ func mapGet(obj map[string]interface{}, pth string) interface{} {
 		return mapGet(val, pth[dot+1:])
 	}
 	return nil
+}
+
+func mapString(txt string, obj map[string]interface{}) string {
+	return reTemplate.ReplaceAllStringFunc(txt, func(m string) string {
+		var val = mapGet(obj, m[2:len(m)-1])
+		if arr, ok := val.([]string); ok {
+			return strings.Join(arr, ",")
+		}
+		return fmt.Sprintf("%v", val)
+	})
 }

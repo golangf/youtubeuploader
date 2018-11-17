@@ -97,8 +97,8 @@ func main() {
 	}
 	// update upload
 	if id != "" || videoFile != nil {
-		updateUpload(upload)
-		logUpload(upload)
+		getUploadFlags(upload, &videoMeta)
+		logUploadFlags(upload)
 	}
 	// upload video
 	if videoFile != nil {
