@@ -95,6 +95,13 @@ func parseFloat(txt string, def float64) float64 {
 	return ans
 }
 
+func parseString(txt string, def string) string {
+	if txt != "" {
+		return txt
+	}
+	return def
+}
+
 func parseCategory(txt string) int {
 	ans, err := strconv.ParseInt(txt, 10, 32)
 	if err == nil {
