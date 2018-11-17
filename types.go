@@ -137,6 +137,15 @@ func shortString(txt string, max int) string {
 	return txt[0:max-3] + "..."
 }
 
+func stringsIncludes(arr []string, val string) bool {
+	for _, itm := range arr {
+		if itm == val {
+			return true
+		}
+	}
+	return false
+}
+
 func arrayJoin(arr []interface{}, sep string) string {
 	var sb strings.Builder
 	for _, val := range arr {

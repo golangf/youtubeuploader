@@ -19,6 +19,44 @@ var reTemplate = regexp.MustCompile("\\$\\{.*?\\}")
 //
 // Functions
 //
+// Limit title to 100 characters.
+func limitTitle(txt string) string {
+	var re = regexp.MustCompile("<|>")
+	txt = re.ReplaceAllString(txt, "")
+	if len(txt) <= 100 {
+		return txt
+	}
+	return txt[0:96] + " ..."
+}
+
+// Limit description to 5000 characters.
+func limitDescription(txt string) string {
+	var re = regexp.MustCompile("<|>")
+	txt = re.ReplaceAllString(txt, "")
+	if len(txt) <= 5000 {
+		return txt
+	}
+	return txt[0:4996] + " ..."
+}
+
+// Limit tags to 30, 450 characters.
+func limitTags(tags []string) []string {
+	var l = 0
+	var z []string
+	for _, tag := range tags {
+		var t = strings.ToLower(tag)
+		if len(t) > 30 || stringsIncludes(z, t) {
+			continue
+		}
+		if l+len(t)+2 > 450 {
+			break
+		}
+		z = append(z, t)
+		l += len(t) + 2
+	}
+	return z
+}
+
 func getUploadFlagsDefault(y *youtube.Video) {
 	y.Snippet.Title = parseString(y.Snippet.Title, f.Video)
 	y.Snippet.Description = parseString(y.Snippet.Description, f.Video)
@@ -66,6 +104,9 @@ func getUploadFlagsDynamic(y *youtube.Video, m *VideoMeta) {
 func getUploadFlags(y *youtube.Video, m *VideoMeta) {
 	getUploadFlagsDynamic(y, m)
 	getUploadFlagsDefault(y)
+	y.Snippet.Title = limitTitle(y.Snippet.Title)
+	y.Snippet.Description = limitDescription(y.Snippet.Description)
+	y.Snippet.Tags = limitTags(y.Snippet.Tags)
 }
 
 func searchVideoTitle(srv *youtube.Service, txt string) []string {
