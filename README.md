@@ -88,19 +88,19 @@ youtubeuploader [options]
 # -d, --descriptionpath: set input description file
 # -ci, --client_id:      set client id credentials path (client_id.json)
 # -ct, --client_token:   set client token credentials path (client_token.json)
-# -ot, --title:         set title (video)
-# -od, --description:   set description (video)
-# -ok, --tags:          set tags/keywords
-# -ol, --language:      set language (en)
-# -oc, --category:      set category (people and blogs)
-# -op, --privacystatus: set privacy status (private)
-# -oe, --embeddable:    enable to be embeddable
-# -ol, --license:       set license (standard)
-# -os, --publicstatsviewable: enable public stats to be viewable
-# -opa, --publishat:          set publish time
-# -ord, --recordingdate:  set recording date
-# -opi, --playlistids:    set playlist ids
-# -opt, --playlisttitles: set playlist titles
+# -ot, --title:          set title (video)
+# -od, --description:    set description (video)
+# -ok, --tags:           set tags/keywords
+# -ol, --language:       set language (en)
+# -oc, --category:       set category (people and blogs)
+# -op, --privacystatus:  set privacy status (private)
+# -oe, --embeddable:     enable to be embeddable
+# -ol, --license:        set license (standard)
+# -os, --publicstatsviewable:  enable public stats to be viewable
+# -opa, --publishat:           set publish time
+# -ord, --recordingdate:       set recording date
+# -opi, --playlistids:         set playlist ids
+# -opt, --playlisttitles:      set playlist titles
 # -ola, --location_latitude:   set latitude coordinate
 # -olo, --location_longitude:  set longitude coordinate
 # -old, --locationdescription: set location description
@@ -111,7 +111,7 @@ youtubeuploader [options]
 # -ah, --auth_headless: enable browserless OAuth process
 
 # Environment variables:
-$YOUTUBEUPLOADER_LOG # enable log (0)
+$YOUTUBEUPLOADER_LOG       # enable log (0)
 $YOUTUBEUPLOADER_VIDEO     # set input video file
 $YOUTUBEUPLOADER_THUMBNAIL # set input thumbnail file
 $YOUTUBEUPLOADER_CAPTION   # set input caption file
@@ -119,19 +119,19 @@ $YOUTUBEUPLOADER_META      # set input meta file
 $YOUTUBEUPLOADER_DESCRIPTIONPATH # set input description file
 $YOUTUBEUPLOADER_CLIENT_ID       # set client id credentials path (client_id.json)
 $YOUTUBEUPLOADER_CLIENT_TOKEN    # set client token credentials path (client_token.json)
-$YOUTUBEUPLOADER_TITLE         # set title (file)
-$YOUTUBEUPLOADER_DESCRIPTION   # set description (file)
-$YOUTUBEUPLOADER_TAGS          # set tags/keywords
-$YOUTUBEUPLOADER_LANGUAGE      # set language (en)
-$YOUTUBEUPLOADER_CATEGORY      # set category id (22)
-$YOUTUBEUPLOADER_PRIVACYSTATUS # set privacy (private)
-$YOUTUBEUPLOADER_EMBEDDABLE    # enable to be embeddable (0)
-$YOUTUBEUPLOADER_LICENSE       # set license (standard)
+$YOUTUBEUPLOADER_TITLE           # set title (file)
+$YOUTUBEUPLOADER_DESCRIPTION     # set description (file)
+$YOUTUBEUPLOADER_TAGS            # set tags/keywords
+$YOUTUBEUPLOADER_LANGUAGE        # set language (en)
+$YOUTUBEUPLOADER_CATEGORY        # set category id (22)
+$YOUTUBEUPLOADER_PRIVACYSTATUS   # set privacy (private)
+$YOUTUBEUPLOADER_EMBEDDABLE      # enable to be embeddable (0)
+$YOUTUBEUPLOADER_LICENSE         # set license (standard)
 $YOUTUBEUPLOADER_PUBLICSTATSVIEWABLE # enable public stats to be viewable (0)
 $YOUTUBEUPLOADER_PUBLISHAT           # set publish time
-$YOUTUBEUPLOADER_RECORDINGDATE  # set recording date
-$YOUTUBEUPLOADER_PLAYLISTIDS    # set playlist ids
-$YOUTUBEUPLOADER_PLAYLISTTITLES # set playlist titles
+$YOUTUBEUPLOADER_RECORDINGDATE       # set recording date
+$YOUTUBEUPLOADER_PLAYLISTIDS         # set playlist ids
+$YOUTUBEUPLOADER_PLAYLISTTITLES      # set playlist titles
 $YOUTUBEUPLOADER_LOCATION_LATITUDE   # set latitude coordinate
 $YOUTUBEUPLOADER_LOCATION_LONGITUDE  # set longitude coordinate
 $YOUTUBEUPLOADER_LOCATIONDESCRIPTION # set location description
