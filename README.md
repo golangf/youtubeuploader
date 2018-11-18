@@ -14,7 +14,6 @@ Sample: ["Pixelsphere OST (2017)"].
 1. Download for your OS from [releases].
 2. Extract it to a directory and add the directory to `PATH`.
 
-
 ### get client id
 
 1. Create an [account] on [Google Cloud Platform].
@@ -38,7 +37,6 @@ Sample: ["Pixelsphere OST (2017)"].
 19. Select `Download`, then `Done`.
 21. Copy downloaded file (`client_id.json`) to a directory.
 
-
 ### get client token
 
 1. Open [console] in the above directory.
@@ -60,10 +58,12 @@ Sample: ["Pixelsphere OST (2017)"].
 
 ```bash
 # on linux or macos console
-export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+export YOUTUBEUPLOADER_CLIENT_ID="[PATH TO client_id.json]"
+export YOUTUBEUPLOADER_CLIENT_TOKEN="[PATH TO client_token.json]"
 
 # on windows powershell
-$env:GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+$env:YOUTUBEUPLOADER_CLIENT_ID="[PATH TO client_id.json]"
+$env:YOUTUBEUPLOADER_CLIENT_TOKEN="[PATH TO client_token.json]"
 ```
 <br>
 
