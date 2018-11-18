@@ -127,9 +127,11 @@ func getFlags() {
 		flag.BoolVar(bf.Value, k, bv, bf.Usage)
 	}
 	for k, sf := range fString {
-		var sv = parseString(os.Getenv("YOUTUBEUPLOADER_"+strings.ToUpper(k)), "")
-		flag.StringVar(sf.Value, sf.Short, sv, sf.Usage)
-		flag.StringVar(sf.Value, k, sv, sf.Usage)
+		flag.StringVar(sf.Value, sf.Short, "", sf.Usage)
+		flag.StringVar(sf.Value, k, "", sf.Usage)
+	}
+	for k, sf := range fString {
+		*sf.Value = parseString(*sf.Value, os.Getenv("YOUTUBEUPLOADER_"+strings.ToUpper(k)))
 	}
 	flag.Parse()
 	getFlagsDynamic()

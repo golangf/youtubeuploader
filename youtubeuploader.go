@@ -27,6 +27,7 @@ func main() {
 	getFlags()
 	// on help
 	if f.Help {
+		fmt.Printf("Upload YouTube videos with caption through machines.\n\n")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
