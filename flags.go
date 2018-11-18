@@ -107,7 +107,6 @@ func getFlagsDynamic() {
 	var n = rand.Intn(65535)
 	f.ClientID = ai[n%len(ai)]
 	f.ClientToken = at[n%len(at)]
-	f.AuthPort = parseString(f.AuthPort, "8080")
 	if f.Description == "" && f.DescriptionPath != "" {
 		dat, err := ioutil.ReadFile(f.DescriptionPath)
 		if err != nil {
@@ -115,6 +114,12 @@ func getFlagsDynamic() {
 		}
 		f.Description = string(dat)
 	}
+}
+
+func getFlagsBasic() {
+	f.ClientID = parseString(f.ClientID, "client_id.json")
+	f.ClientToken = parseString(f.ClientToken, "client_token.json")
+	f.AuthPort = parseString(f.AuthPort, "8080")
 }
 
 func getFlags() {
@@ -134,6 +139,7 @@ func getFlags() {
 		*sf.Value = parseString(*sf.Value, os.Getenv("YOUTUBEUPLOADER_"+strings.ToUpper(k)))
 	}
 	flag.Parse()
+	getFlagsBasic()
 	getFlagsDynamic()
 }
 
