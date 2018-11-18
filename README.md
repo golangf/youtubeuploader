@@ -48,6 +48,23 @@ Sample: ["Pixelsphere OST (2017)"].
 4. `youtubeuploader` wants to access your Google Account.
 5. Select `Allow`, and close browser window.
 6. `client_token.json` should be created.
+
+### set environment variables
+
+1. Copy path of `client_id.json`.
+2. Set environment variable `YOUTUBEUPLOADER_CLIENT_ID` to it.
+3. Copy path of `client_token.json`.
+4. Set environment variable `YOUTUBEUPLOADER_CLIENT_TOKEN` to it.
+5. Now you can use **youtubeuploader** from any directory.
+> On Windows, use [RapidEE] to set environment variable.
+
+```bash
+# on linux or macos console
+export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+
+# on windows powershell
+$env:GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+```
 <br>
 
 
@@ -203,6 +220,7 @@ Suggestions are welcome. Please [create an issue].
 [new project]: https://console.cloud.google.com/projectcreate
 [YouTube Data API]: https://console.cloud.google.com/apis/library/youtube.googleapis.com
 [credentials]: https://console.cloud.google.com/apis/credentials/wizard
+[RapidEE]: https://www.rapidee.com/en/about
 
 [original code]: https://github.com/porjo/youtubeuploader
 [porjo]: https://github.com/porjo
