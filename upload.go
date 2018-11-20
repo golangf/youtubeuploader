@@ -110,7 +110,7 @@ func getUploadFlags(y *youtube.Video, m *VideoMeta) {
 }
 
 func searchVideoTitle(srv *youtube.Service, txt string) []string {
-	res, err := srv.Search.List("snippet").Type("video").Q(txt).Do()
+	res, err := srv.Search.List("snippet").Type("video").MaxResults(50).Q(txt).Do()
 	if err != nil {
 		if res != nil {
 			log.Fatalf("Error searching video title  '%v': %v, %v", txt, err, res.HTTPStatusCode)
