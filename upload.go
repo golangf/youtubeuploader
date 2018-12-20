@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 // Global variables
 //
 var reTemplate = regexp.MustCompile("\\$\\{.*?\\}")
+var retries = 8
 
 //
 // Functions
@@ -173,20 +175,27 @@ func uploadThumbnail(srv *youtube.Service, id string, fil io.ReadCloser) {
 }
 
 func uploadCaption(srv *youtube.Service, id string, lng string, fil io.ReadCloser) {
+	var err error
+	var res *youtube.Caption
 	c := &youtube.Caption{
 		Snippet: &youtube.CaptionSnippet{},
 	}
 	c.Snippet.VideoId = id
 	c.Snippet.Language = lng
 	c.Snippet.Name = lng
-	req := srv.Captions.Insert("snippet", c).Sync(true)
-	res, err := req.Media(fil).Do()
-	if err != nil {
-		if res != nil {
-			log.Fatalf("Error uploading caption: %v, %v", err, res.HTTPStatusCode)
+	for i := 0; i < retries; i++ {
+		req := srv.Captions.Insert("snippet", c).Sync(true)
+		res, err = req.Media(fil).Do()
+		if err == nil {
+			break
+		} else if res == nil {
+			log.Printf("Error uploading caption: %v", err)
 		} else {
-			log.Fatalf("Error uploading caption: %v", err)
+			log.Printf("Error uploading caption: %v, %v", err, res.HTTPStatusCode)
 		}
+	}
+	if err != nil {
+		os.Exit(1)
 	}
 }
 

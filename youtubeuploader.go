@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"golang.org/x/oauth2"
 	"google.golang.org/api/youtube/v3"
@@ -107,13 +106,11 @@ func main() {
 		logf("Uploading file '%s'...\n", f.Video)
 		video := uploadVideo(service, videoFile, upload, parseInt(f.UploadChunk, 0), quitChan)
 		logf("Upload successful! Video ID: %v\n", video.Id)
-		time.Sleep(time.Second)
 		id = video.Id
 	} else if id != "" {
 		logf("Updating video %v...\n", id)
 		updateVideo(service, id, upload)
 		logf("Update successful!\n")
-		time.Sleep(time.Second)
 	}
 	// upload thumbnail
 	if id != "" && thumbnailFile != nil {
