@@ -112,7 +112,7 @@ func getUploadFlags(y *youtube.Video, m *VideoMeta) {
 }
 
 func searchVideoTitle(srv *youtube.Service, txt string) []string {
-	res, err := srv.Search.List("snippet").Type("video").MaxResults(50).Q(txt).Do()
+	res, err := srv.Search.List([]string{"snippet"}).Type("video").MaxResults(50).Q(txt).Do()
 	if err != nil {
 		if res != nil {
 			log.Fatalf("Error searching video title  '%v': %v, %v", txt, err, res.HTTPStatusCode)
@@ -134,7 +134,7 @@ func searchVideoTitle(srv *youtube.Service, txt string) []string {
 
 func updateVideo(srv *youtube.Service, id string, obj *youtube.Video) {
 	obj.Id = id
-	res, err := srv.Videos.Update("snippet,status,recordingDetails", obj).Do()
+	res, err := srv.Videos.Update([]string{"snippet", "status", "recordingDetails"}, obj).Do()
 	if err != nil {
 		if res != nil {
 			log.Fatalf("Error updating video: %v, %v", err, res.HTTPStatusCode)
@@ -146,7 +146,7 @@ func updateVideo(srv *youtube.Service, id string, obj *youtube.Video) {
 
 func uploadVideo(srv *youtube.Service, fil io.ReadCloser, obj *youtube.Video, cnk int, cquit chanChan) *youtube.Video {
 	opt := googleapi.ChunkSize(cnk)
-	req := srv.Videos.Insert("snippet,status,recordingDetails", obj)
+	req := srv.Videos.Insert([]string{"snippet", "status", "recordingDetails"}, obj)
 	res, err := req.Media(fil, opt).Do()
 	if cquit != nil {
 		quit := make(chan struct{})
@@ -184,7 +184,7 @@ func uploadCaption(srv *youtube.Service, id string, lng string, fil io.ReadClose
 	c.Snippet.Language = lng
 	c.Snippet.Name = lng
 	for i := 0; i < retries; i++ {
-		req := srv.Captions.Insert("snippet", c).Sync(true)
+		req := srv.Captions.Insert([]string{"snippet"}, c).Sync(true)
 		res, err = req.Media(fil).Do()
 		if err == nil {
 			break
